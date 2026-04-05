@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String
+  password String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Client {
+  id              Int          @id @default(autoincrement())
+  name            String
+  email           String       @unique
+  phone           String
+  status          ClientStatus @default(ACTIVE)
+  lastAttendance  DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  // Relations
+  attendances     Attendance[]
+
+  @@index([status])
+  @@index([lastAttendance])
+  @@map("clients")
+}
+
+model Attendance {
+  id        Int      @id @default(autoincrement())
+  clientId  Int
+  attendedAt DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([attendedAt])
+  @@map("attendances")
+}
+
+enum ClientStatus {
+  ACTIVE
+  AT_RISK
+  INACTIVE
+}

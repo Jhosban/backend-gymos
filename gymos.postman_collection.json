@@ -1,0 +1,377 @@
+{
+  "info": {
+    "_postman_id": "8f5d8f91-0ea8-4a58-9c4d-45f8f7b86f12",
+    "name": "GymOS API",
+    "description": "Coleccion para probar la API de GymOS en Hoppscotch/Postman.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1"
+    },
+    {
+      "key": "token",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AZ3ltb3MuY29tIiwiaWF0IjoxNzc1NDMxMzA4LCJleHAiOjE3NzU0MzEzMTF9.pZ6tRAsEo1wfc2X7S_vFdLFcf383WTq0mpKY54vwGXI"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register New User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"name\": \"Admin User\",\n  \"password\": \"Admin123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"Admin123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Clients",
+      "item": [
+        {
+          "name": "Create Client",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"+1234567890\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clients",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clients"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Clients",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clients",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clients"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Client by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clients/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clients",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Client",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Updated\",\n  \"email\": \"john.updated@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clients/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clients",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Client",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clients/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clients",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Attendance",
+      "item": [
+        {
+          "name": "Register Attendance",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": 1,\n  \"attendedAt\": \"2024-04-05T10:30:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/attendance",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendance"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Attendance Records",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/attendance",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendance"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Attendance History for Client",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/attendance/client/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "attendance",
+                "client",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Retention",
+      "item": [
+        {
+          "name": "Get Retention Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/retention/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "retention",
+                "status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get At-Risk Clients",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/retention/at-risk",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "retention",
+                "at-risk"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Recalculate Client Status",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/retention/recalculate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "retention",
+                "recalculate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:3000/health",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "health"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
