@@ -1,26 +1,117 @@
 {
   "info": {
-    "_postman_id": "8f5d8f91-0ea8-4a58-9c4d-45f8f7b86f12",
-    "name": "GymOS API",
-    "description": "Coleccion para probar la API de GymOS en Hoppscotch/Postman.",
+    "_postman_id": "a3f9d3a5-6d9c-4f62-8d8d-8c7c8d4e7a11",
+    "name": "GymOS Backend API",
+    "description": "Coleccion completa para probar el backend de GymOS contra localhost o Supabase.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
   },
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:3000/api/v1"
+      "value": "http://localhost:3001/v1"
     },
     {
-      "key": "token",
-      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AZ3ltb3MuY29tIiwiaWF0IjoxNzc1NDMxMzA4LCJleHAiOjE3NzU0MzEzMTF9.pZ6tRAsEo1wfc2X7S_vFdLFcf383WTq0mpKY54vwGXI"
+      "key": "accessToken",
+      "value": ""
+    },
+    {
+      "key": "memberId",
+      "value": ""
+    },
+    {
+      "key": "attendanceId",
+      "value": ""
+    },
+    {
+      "key": "leadId",
+      "value": ""
+    },
+    {
+      "key": "equipmentId",
+      "value": ""
+    },
+    {
+      "key": "maintenanceId",
+      "value": ""
+    },
+    {
+      "key": "alertId",
+      "value": ""
     }
   ],
   "item": [
     {
+      "name": "System",
+      "item": [
+        {
+          "name": "Root",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                ""
+              ]
+            },
+            "description": "Verifica que la API responda en el root."
+          }
+        },
+        {
+          "name": "Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Health check simple de la aplicacion."
+          }
+        },
+        {
+          "name": "Health DB",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health/db",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health",
+                "db"
+              ]
+            },
+            "description": "Health check que consulta Prisma y confirma la conexion con la base de datos."
+          }
+        }
+      ]
+    },
+    {
       "name": "Auth",
       "item": [
         {
-          "name": "Register New User",
+          "name": "Register",
           "request": {
             "method": "POST",
             "header": [
@@ -31,7 +122,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"name\": \"Admin User\",\n  \"password\": \"Admin123!\"\n}"
+              "raw": "{\n  \"email\": \"admin@gym.com\",\n  \"name\": \"Admin User\",\n  \"password\": \"password123\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/auth/register",
@@ -42,7 +133,24 @@
                 "auth",
                 "register"
               ]
-            }
+            },
+            "description": "Crea un usuario y devuelve un JWT.",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "try {",
+                    "  const json = pm.response.json();",
+                    "  if (json && json.data && json.data.token) {",
+                    "    pm.collectionVariables.set('accessToken', json.data.token);",
+                    "  }",
+                    "} catch (error) {}"
+                  ]
+                }
+              }
+            ]
           }
         },
         {
@@ -57,7 +165,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"Admin123!\"\n}"
+              "raw": "{\n  \"email\": \"admin@gym.com\",\n  \"password\": \"password123\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/auth/login",
@@ -68,136 +176,208 @@
                 "auth",
                 "login"
               ]
-            }
+            },
+            "description": "Inicia sesion y guarda el token en la variable de coleccion.",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "try {",
+                    "  const json = pm.response.json();",
+                    "  if (json && json.data && json.data.token) {",
+                    "    pm.collectionVariables.set('accessToken', json.data.token);",
+                    "  }",
+                    "} catch (error) {}"
+                  ]
+                }
+              }
+            ]
           }
         }
       ]
     },
     {
-      "name": "Clients",
+      "name": "Members",
       "item": [
         {
-          "name": "Create Client",
+          "name": "List members",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/members?page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "members"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Lista miembros con paginacion."
+          }
+        },
+        {
+          "name": "Get member by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/members/{{memberId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "members",
+                "{{memberId}}"
+              ]
+            },
+            "description": "Obtiene un miembro por id."
+          }
+        },
+        {
+          "name": "Create member",
           "request": {
             "method": "POST",
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"+1234567890\"\n}"
+              "raw": "{\n  \"name\": \"Carlos Rodriguez\",\n  \"email\": \"carlos@example.com\",\n  \"phone\": \"+57 300 123 4567\",\n  \"goal\": \"GANAR_MUSCULO\",\n  \"experienceLevel\": \"INTERMEDIO\",\n  \"membershipType\": \"PREMIUM\",\n  \"joinedAt\": \"2026-04-22T00:00:00.000Z\",\n  \"membershipEnd\": \"2026-05-22T00:00:00.000Z\",\n  \"monthlyPrice\": 120000,\n  \"membershipStatus\": \"ACTIVO\",\n  \"preferredSchedule\": \"TARDE\",\n  \"acquisitionSource\": \"INSTAGRAM\",\n  \"assignedTrainer\": \"Entrenador Juan\",\n  \"notes\": \"Miembro de prueba creado desde Postman\"\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/clients",
+              "raw": "{{baseUrl}}/members",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "clients"
+                "members"
               ]
-            }
-          }
-        },
-        {
-          "name": "Get All Clients",
-          "request": {
-            "method": "GET",
-            "header": [
+            },
+            "description": "Crea un miembro.",
+            "event": [
               {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "try {",
+                    "  const json = pm.response.json();",
+                    "  if (json && json.data && json.data.id) {",
+                    "    pm.collectionVariables.set('memberId', json.data.id);",
+                    "  }",
+                    "} catch (error) {}"
+                  ]
+                }
               }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/clients",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "clients"
-              ]
-            }
+            ]
           }
         },
         {
-          "name": "Get Client by ID",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/clients/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "clients",
-                "1"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Update Client",
+          "name": "Update member",
           "request": {
             "method": "PATCH",
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"John Updated\",\n  \"email\": \"john.updated@example.com\"\n}"
+              "raw": "{\n  \"phone\": \"+57 300 999 0000\",\n  \"notes\": \"Actualizado desde Postman\"\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/clients/1",
+              "raw": "{{baseUrl}}/members/{{memberId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "clients",
-                "1"
+                "members",
+                "{{memberId}}"
               ]
-            }
+            },
+            "description": "Actualiza un miembro."
           }
         },
         {
-          "name": "Delete Client",
+          "name": "Delete member",
           "request": {
             "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/clients/1",
+              "raw": "{{baseUrl}}/members/{{memberId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "clients",
-                "1"
+                "members",
+                "{{memberId}}"
               ]
-            }
+            },
+            "description": "Elimina un miembro."
+          }
+        },
+        {
+          "name": "Record check-in",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"duration\": 60,\n  \"activities\": [\"pesas\", \"cardio\"],\n  \"note\": \"Ingreso registrado desde Postman\",\n  \"attendedAt\": \"2026-04-22T10:00:00.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/members/{{memberId}}/checkin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "members",
+                "{{memberId}}",
+                "checkin"
+              ]
+            },
+            "description": "Registra una asistencia para un miembro."
+          }
+        },
+        {
+          "name": "Export CSV",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/members/export/csv",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "members",
+                "export",
+                "csv"
+              ]
+            },
+            "description": "Exporta miembros en CSV."
           }
         }
       ]
@@ -206,22 +386,18 @@
       "name": "Attendance",
       "item": [
         {
-          "name": "Register Attendance",
+          "name": "Create attendance",
           "request": {
             "method": "POST",
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"clientId\": 1,\n  \"attendedAt\": \"2024-04-05T10:30:00Z\"\n}"
+              "raw": "{\n  \"clientId\": \"{{memberId}}\",\n  \"attendedAt\": \"2026-04-22T10:00:00.000Z\",\n  \"duration\": 60,\n  \"activities\": [\"pesas\", \"cardio\"],\n  \"note\": \"Asistencia creada desde Postman\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/attendance",
@@ -231,19 +407,31 @@
               "path": [
                 "attendance"
               ]
-            }
+            },
+            "description": "Crea un registro de asistencia.",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "try {",
+                    "  const json = pm.response.json();",
+                    "  if (json && json.data && json.data.id) {",
+                    "    pm.collectionVariables.set('attendanceId', json.data.id);",
+                    "  }",
+                    "} catch (error) {}"
+                  ]
+                }
+              }
+            ]
           }
         },
         {
-          "name": "Get All Attendance Records",
+          "name": "List attendance",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/attendance",
               "host": [
@@ -252,30 +440,491 @@
               "path": [
                 "attendance"
               ]
-            }
+            },
+            "description": "Lista todas las asistencias."
           }
         },
         {
-          "name": "Get Attendance History for Client",
+          "name": "List attendance by client",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/attendance/client/1",
+              "raw": "{{baseUrl}}/attendance/client/{{memberId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "attendance",
                 "client",
-                "1"
+                "{{memberId}}"
               ]
-            }
+            },
+            "description": "Lista asistencias de un miembro."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Leads",
+      "item": [
+        {
+          "name": "List leads",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/leads?page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leads"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Lista leads con paginacion."
+          }
+        },
+        {
+          "name": "Get lead by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/leads/{{leadId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leads",
+                "{{leadId}}"
+              ]
+            },
+            "description": "Obtiene un lead por id."
+          }
+        },
+        {
+          "name": "Create lead",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Roberto Gomez\",\n  \"email\": \"roberto@example.com\",\n  \"phone\": \"+57 305 678 9012\",\n  \"fitnessGoal\": \"Perder 10kg en 3 meses\",\n  \"budget\": 100000,\n  \"source\": \"INSTAGRAM\",\n  \"status\": \"NUEVO\",\n  \"assignedAdvisor\": \"Asesor Maria\",\n  \"notes\": \"Lead creado desde Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/leads",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leads"
+              ]
+            },
+            "description": "Crea un lead.",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "try {",
+                    "  const json = pm.response.json();",
+                    "  if (json && json.data && json.data.id) {",
+                    "    pm.collectionVariables.set('leadId', json.data.id);",
+                    "  }",
+                    "} catch (error) {}"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "Update lead",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"TOUR_AGENDADO\",\n  \"notes\": \"Actualizado desde Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/leads/{{leadId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leads",
+                "{{leadId}}"
+              ]
+            },
+            "description": "Actualiza un lead."
+          }
+        },
+        {
+          "name": "Move lead stage",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"PROPUESTA\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/leads/{{leadId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leads",
+                "{{leadId}}",
+                "status"
+              ]
+            },
+            "description": "Mueve el lead a otro estado."
+          }
+        },
+        {
+          "name": "Delete lead",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/leads/{{leadId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leads",
+                "{{leadId}}"
+              ]
+            },
+            "description": "Elimina un lead."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Equipment",
+      "item": [
+        {
+          "name": "List equipment",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/equipment?page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "equipment"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Lista el equipamiento."
+          }
+        },
+        {
+          "name": "Get equipment by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/equipment/{{equipmentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "equipment",
+                "{{equipmentId}}"
+              ]
+            },
+            "description": "Obtiene un equipo por id."
+          }
+        },
+        {
+          "name": "Create equipment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cinta de Correr Pro\",\n  \"category\": \"CARDIO\",\n  \"brand\": \"Technogym\",\n  \"model\": \"Run 500\",\n  \"serialNumber\": \"TG-2024-001\",\n  \"purchaseDate\": \"2026-04-22T00:00:00.000Z\",\n  \"warrantyEnd\": \"2027-04-22T00:00:00.000Z\",\n  \"price\": 8500000,\n  \"status\": \"NUEVO\",\n  \"location\": \"Zona Cardio\",\n  \"maintenanceIntervalDays\": 30,\n  \"totalUsageHours\": 0,\n  \"notes\": \"Equipo creado desde Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/equipment",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "equipment"
+              ]
+            },
+            "description": "Crea un equipo.",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "try {",
+                    "  const json = pm.response.json();",
+                    "  if (json && json.data && json.data.id) {",
+                    "    pm.collectionVariables.set('equipmentId', json.data.id);",
+                    "  }",
+                    "} catch (error) {}"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "Update equipment",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"OPERATIVO\",\n  \"notes\": \"Actualizado desde Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/equipment/{{equipmentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "equipment",
+                "{{equipmentId}}"
+              ]
+            },
+            "description": "Actualiza un equipo."
+          }
+        },
+        {
+          "name": "Delete equipment",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/equipment/{{equipmentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "equipment",
+                "{{equipmentId}}"
+              ]
+            },
+            "description": "Elimina un equipo."
+          }
+        },
+        {
+          "name": "List maintenance history",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/equipment/{{equipmentId}}/maintenance",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "equipment",
+                "{{equipmentId}}",
+                "maintenance"
+              ]
+            },
+            "description": "Lista el historial de mantenimiento de un equipo."
+          }
+        },
+        {
+          "name": "Schedule maintenance",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"PREVENTIVO\",\n  \"description\": \"Mantenimiento preventivo mensual\",\n  \"technician\": \"Tecnico Juan Perez\",\n  \"cost\": 150000,\n  \"scheduledDate\": \"2026-05-07T00:00:00.000Z\",\n  \"status\": \"PENDIENTE\",\n  \"notes\": \"Programado desde Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/equipment/{{equipmentId}}/maintenance",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "equipment",
+                "{{equipmentId}}",
+                "maintenance"
+              ]
+            },
+            "description": "Programa un mantenimiento.",
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "type": "text/javascript",
+                  "exec": [
+                    "try {",
+                    "  const json = pm.response.json();",
+                    "  if (json && json.data && json.data.id) {",
+                    "    pm.collectionVariables.set('maintenanceId', json.data.id);",
+                    "  }",
+                    "} catch (error) {}"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "Complete maintenance",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"Mantenimiento finalizado desde Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/equipment/{{equipmentId}}/maintenance/{{maintenanceId}}/complete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "equipment",
+                "{{equipmentId}}",
+                "maintenance",
+                "{{maintenanceId}}",
+                "complete"
+              ]
+            },
+            "description": "Marca un mantenimiento como completado."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Alerts",
+      "item": [
+        {
+          "name": "List alerts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/alerts?status=PENDIENTE&severity=CRITICA",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "alerts"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "PENDIENTE"
+                },
+                {
+                  "key": "severity",
+                  "value": "CRITICA"
+                }
+              ]
+            },
+            "description": "Lista alertas con filtros opcionales."
+          }
+        },
+        {
+          "name": "Get alert by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/alerts/{{alertId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "alerts",
+                "{{alertId}}"
+              ]
+            },
+            "description": "Obtiene una alerta por id."
+          }
+        },
+        {
+          "name": "Resolve alert",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/alerts/{{alertId}}/resolve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "alerts",
+                "{{alertId}}",
+                "resolve"
+              ]
+            },
+            "description": "Marca una alerta como resuelta."
           }
         }
       ]
@@ -284,15 +933,10 @@
       "name": "Retention",
       "item": [
         {
-          "name": "Get Retention Status",
+          "name": "Retention status",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/retention/status",
               "host": [
@@ -302,41 +946,15 @@
                 "retention",
                 "status"
               ]
-            }
+            },
+            "description": "Devuelve el estado de retencion actual."
           }
         },
         {
-          "name": "Get At-Risk Clients",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/retention/at-risk",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "retention",
-                "at-risk"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Recalculate Client Status",
+          "name": "Recalculate retention",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/retention/recalculate",
               "host": [
@@ -346,29 +964,103 @@
                 "retention",
                 "recalculate"
               ]
-            }
+            },
+            "description": "Recalcula los estados de retencion."
+          }
+        },
+        {
+          "name": "At risk clients",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/retention/at-risk",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "retention",
+                "at-risk"
+              ]
+            },
+            "description": "Lista los clientes en riesgo."
           }
         }
       ]
     },
     {
-      "name": "Health",
+      "name": "Dashboard",
       "item": [
         {
-          "name": "Health Check",
+          "name": "Metrics",
           "request": {
             "method": "GET",
+            "header": [],
             "url": {
-              "raw": "http://localhost:3000/health",
-              "protocol": "http",
+              "raw": "{{baseUrl}}/dashboard/metrics",
               "host": [
-                "localhost"
+                "{{baseUrl}}"
               ],
-              "port": "3000",
               "path": [
-                "health"
+                "dashboard",
+                "metrics"
               ]
-            }
+            },
+            "description": "Metricas generales del sistema."
+          }
+        },
+        {
+          "name": "Churn distribution",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/churn-distribution",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "churn-distribution"
+              ]
+            },
+            "description": "Distribucion de riesgo de churn."
+          }
+        },
+        {
+          "name": "Pipeline data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/pipeline-data",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "pipeline-data"
+              ]
+            },
+            "description": "Datos del pipeline de leads."
+          }
+        },
+        {
+          "name": "Membership types",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/membership-types",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "membership-types"
+              ]
+            },
+            "description": "Distribucion de tipos de membresia."
           }
         }
       ]

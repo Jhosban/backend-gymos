@@ -1,76 +1,51 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '@/prisma/prisma.service';
+import { GymDataService } from '@/shared/gym-data.service';
 import { CreateAttendanceDto, AttendanceResponseDto } from './dtos/attendance.dto';
-import { Attendance } from '@prisma/client';
 
 @Injectable()
 export class AttendanceService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private gymData: GymDataService) {}
 
   async create(
     createAttendanceDto: CreateAttendanceDto,
   ): Promise<AttendanceResponseDto> {
-    // Verify client exists
-    const client = await this.prisma.client.findUnique({
-      where: { id: createAttendanceDto.clientId },
+    const attendance = await this.gymData.recordCheckIn(createAttendanceDto.clientId, {
+      duration: createAttendanceDto.duration,
+      activities: createAttendanceDto.activities,
+      note: createAttendanceDto.note,
+      attendedAt: createAttendanceDto.attendedAt,
     });
 
-    if (!client) {
-      throw new NotFoundException(
-        `Client with ID ${createAttendanceDto.clientId} not found`,
-      );
+    if (!attendance) {
+      throw new NotFoundException(`Client with ID ${createAttendanceDto.clientId} not found`);
     }
 
-    // Create attendance record
-    const attendance = await this.prisma.attendance.create({
-      data: {
-        clientId: createAttendanceDto.clientId,
-        attendedAt: createAttendanceDto.attendedAt || new Date(),
-      },
-    });
-
-    // Update client's lastAttendance
-    await this.prisma.client.update({
-      where: { id: createAttendanceDto.clientId },
-      data: { lastAttendance: attendance.attendedAt },
-    });
-
-    return this.mapToResponseDto(attendance);
+    return this.mapToResponseDto(createAttendanceDto.clientId, attendance);
   }
 
-  async findByClientId(clientId: number): Promise<AttendanceResponseDto[]> {
-    // Verify client exists
-    const client = await this.prisma.client.findUnique({
-      where: { id: clientId },
-    });
-
+  async findByClientId(clientId: string): Promise<AttendanceResponseDto[]> {
+    const client = await this.gymData.getMember(clientId);
     if (!client) {
       throw new NotFoundException(`Client with ID ${clientId} not found`);
     }
 
-    const attendances = await this.prisma.attendance.findMany({
-      where: { clientId },
-      orderBy: { attendedAt: 'desc' },
-    });
-
-    return attendances.map((attendance) => this.mapToResponseDto(attendance));
+    return client.attendance.map((attendance) => this.mapToResponseDto(clientId, attendance));
   }
 
   async findAll(): Promise<AttendanceResponseDto[]> {
-    const attendances = await this.prisma.attendance.findMany({
-      orderBy: { attendedAt: 'desc' },
-    });
-
-    return attendances.map((attendance) => this.mapToResponseDto(attendance));
+    const listed = await this.gymData.listMembers({ page: 1, limit: 100 });
+    return listed.members.flatMap((member) =>
+      member.attendance.map((attendance) => this.mapToResponseDto(member.id, attendance)),
+    );
   }
 
-  private mapToResponseDto(attendance: Attendance): AttendanceResponseDto {
+  private mapToResponseDto(clientId: string, attendance: { date: string; duration?: number; activities?: string[]; note?: string }): AttendanceResponseDto {
     return {
-      id: attendance.id,
-      clientId: attendance.clientId,
-      attendedAt: attendance.attendedAt,
-      createdAt: attendance.createdAt,
-      updatedAt: attendance.updatedAt,
+      id: attendance.date,
+      clientId,
+      attendedAt: new Date(attendance.date),
+      createdAt: new Date(attendance.date),
+      updatedAt: new Date(attendance.date),
     };
   }
 }

@@ -71,10 +71,10 @@ prisma/
 
 ## Variables de entorno
 
-Copia [`.env.example`](.env.example) a `.env` y ajusta los valores.
+Copia [`.env.example`](.env.example) a `.env` y ajusta la cadena de conexión de Supabase.
 
 ```env
-DATABASE_URL="postgresql://postgres:password@db.project.supabase.co:5432/postgres"
+DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT-ID].supabase.co:5432/postgres?schema=public"
 JWT_SECRET="your-super-secret-jwt-key"
 JWT_EXPIRATION=3600
 NODE_ENV=development
@@ -84,7 +84,7 @@ RETENTION_AT_RISK_DAYS=7
 RETENTION_INACTIVE_DAYS=15
 ```
 
-Si usas Supabase, coloca allí la cadena de conexión de PostgreSQL que te da el panel.
+El proyecto ya no usa archivos de entorno alternativos: deja solo `.env` local y `.env.example` como plantilla.
 
 ## Instalación
 
@@ -196,11 +196,11 @@ Al registrar una asistencia, `lastAttendance` se actualiza automáticamente. Lue
 
 ## Supabase
 
-GymOS funciona perfectamente con Supabase porque usa PostgreSQL.
+GymOS funciona con Supabase usando PostgreSQL en `DATABASE_URL`.
 
 1. Crea un proyecto en Supabase.
 2. Copia la cadena de conexión PostgreSQL desde Settings > Database.
-3. Pégala en `DATABASE_URL`.
+3. Pégala en `DATABASE_URL` dentro de `.env`.
 4. Ejecuta:
 
 ```bash
@@ -224,8 +224,6 @@ Credenciales de ejemplo:
 
 ## Documentación adicional
 
-- [Quick start](SUPABASE_QUICKSTART.txt)
-- [Guía Supabase](SUPABASE_SETUP.txt)
 - [Colección Postman](gymos.postman_collection.json)
 
 ## Licencia

@@ -1,13 +1,12 @@
 import { Module } from '@nestjs/common';
 import { RetentionService } from './retention.service';
 import { RetentionController } from './retention.controller';
-import { PrismaModule } from '@/prisma/prisma.module';
-import { AppConfigService } from '@/config/app.config';
+import { SharedModule } from '@/shared/shared.module';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [SharedModule],
   controllers: [RetentionController],
-  providers: [RetentionService, AppConfigService],
+  providers: [RetentionService],
   exports: [RetentionService],
 })
 export class RetentionModule {}

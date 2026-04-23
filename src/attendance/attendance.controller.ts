@@ -6,15 +6,11 @@ import {
   Param,
   HttpCode,
   HttpStatus,
-  UseGuards,
-  ParseIntPipe,
 } from '@nestjs/common';
 import { AttendanceService } from './attendance.service';
 import { CreateAttendanceDto, AttendanceResponseDto } from './dtos/attendance.dto';
-import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 
 @Controller('attendance')
-@UseGuards(JwtAuthGuard)
 export class AttendanceController {
   constructor(private attendanceService: AttendanceService) {}
 
@@ -29,7 +25,7 @@ export class AttendanceController {
   @Get('client/:clientId')
   @HttpCode(HttpStatus.OK)
   async findByClientId(
-    @Param('clientId', ParseIntPipe) clientId: number,
+    @Param('clientId') clientId: string,
   ): Promise<AttendanceResponseDto[]> {
     return this.attendanceService.findByClientId(clientId);
   }

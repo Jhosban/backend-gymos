@@ -1,81 +1,63 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '@/prisma/prisma.service';
+import { GymDataService, CreateMemberInput, UpdateMemberInput } from '@/shared/gym-data.service';
 import { CreateClientDto, UpdateClientDto, ClientResponseDto } from './dtos/client.dto';
-import { Client } from '@prisma/client';
 
 @Injectable()
 export class ClientsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private gymData: GymDataService) {}
 
   async create(createClientDto: CreateClientDto): Promise<ClientResponseDto> {
-    const client = await this.prisma.client.create({
-      data: {
-        name: createClientDto.name,
-        email: createClientDto.email,
-        phone: createClientDto.phone,
-        status: 'ACTIVE',
-      },
-    });
-
-    return this.mapToResponseDto(client);
+    return this.gymData.createMember(createClientDto as CreateMemberInput);
   }
 
-  async findAll(): Promise<ClientResponseDto[]> {
-    const clients = await this.prisma.client.findMany({
-      orderBy: { createdAt: 'desc' },
-    });
-
-    return clients.map((client) => this.mapToResponseDto(client));
+  async findAll(query: { page?: number; limit?: number; search?: string; status?: string; riskLevel?: string } = {}) {
+    return this.gymData.listMembers(query);
   }
 
-  async findOne(id: number): Promise<ClientResponseDto> {
-    const client = await this.prisma.client.findUnique({
-      where: { id },
-    });
+  async findOne(id: string): Promise<ClientResponseDto> {
+    const client = await this.gymData.getMember(id);
 
     if (!client) {
       throw new NotFoundException(`Client with ID ${id} not found`);
     }
 
-    return this.mapToResponseDto(client);
+    return client;
   }
 
   async update(
-    id: number,
+    id: string,
     updateClientDto: UpdateClientDto,
   ): Promise<ClientResponseDto> {
-    const client = await this.prisma.client.update({
-      where: { id },
-      data: updateClientDto,
-    });
+    const client = await this.gymData.updateMember(id, updateClientDto as UpdateMemberInput);
 
-    return this.mapToResponseDto(client);
+    if (!client) {
+      throw new NotFoundException(`Client with ID ${id} not found`);
+    }
+
+    return client;
   }
 
-  async delete(id: number): Promise<{ message: string }> {
-    await this.prisma.client.delete({
-      where: { id },
-    });
+  async delete(id: string): Promise<{ message: string }> {
+    const deleted = await this.gymData.deleteMember(id);
 
-    return { message: `Client with ID ${id} deleted successfully` };
+    if (!deleted) {
+      throw new NotFoundException(`Client with ID ${id} not found`);
+    }
+
+    return { message: 'Miembro eliminado correctamente' };
   }
 
-  async findByEmail(email: string): Promise<Client | null> {
-    return this.prisma.client.findUnique({
-      where: { email },
-    });
+  async recordCheckIn(id: string, payload: { duration?: number; activities?: string[]; note?: string; attendedAt?: string }) {
+    const attendance = await this.gymData.recordCheckIn(id, payload);
+
+    if (!attendance) {
+      throw new NotFoundException(`Client with ID ${id} not found`);
+    }
+
+    return attendance;
   }
 
-  private mapToResponseDto(client: Client): ClientResponseDto {
-    return {
-      id: client.id,
-      name: client.name,
-      email: client.email,
-      phone: client.phone,
-      status: client.status,
-      lastAttendance: client.lastAttendance,
-      createdAt: client.createdAt,
-      updatedAt: client.updatedAt,
-    };
+  async exportCsv(): Promise<string> {
+    return await this.gymData.exportMembersCsv();
   }
 }

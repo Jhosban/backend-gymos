@@ -21,10 +21,11 @@ export class LoginDto {
 }
 
 export class AuthResponseDto {
-  accessToken: string;
+  token: string;
   user: {
-    id: number;
+    id: string;
     email: string;
     name: string;
+    role?: 'admin' | 'trainer' | 'advisor';
   };
 }
