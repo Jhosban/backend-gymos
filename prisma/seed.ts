@@ -4,85 +4,195 @@ import * as bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  // Clean up existing data
+  await prisma.maintenanceRecord.deleteMany({});
+  await prisma.retentionAlert.deleteMany({});
   await prisma.attendance.deleteMany({});
-  await prisma.client.deleteMany({});
+  await prisma.equipment.deleteMany({});
+  await prisma.lead.deleteMany({});
+  await prisma.member.deleteMany({});
   await prisma.user.deleteMany({});
 
-  // Create a sample user
-  const hashedPassword = await bcrypt.hash('admin123', 10);
-  const user = await prisma.user.create({
+  const adminPassword = await bcrypt.hash('password123', 10);
+  await prisma.user.create({
     data: {
-      email: 'admin@gymos.com',
+      email: 'admin@gym.com',
       name: 'Admin User',
-      password: hashedPassword,
+      password: adminPassword,
+      role: 'ADMIN',
     },
   });
 
-  console.log('✅ User created:', user);
+  const now = Date.now();
 
-  // Create sample clients
-  const now = new Date();
-  const client1 = await prisma.client.create({
+  const carlos = await prisma.member.create({
     data: {
-      name: 'John Doe',
-      email: 'john@example.com',
-      phone: '+1234567890',
+      name: 'Carlos Rodriguez',
+      email: 'carlos@email.com',
+      phone: '+57 300 123 4567',
+      birthDate: new Date('1990-05-15T00:00:00Z'),
+      gender: 'M',
+      goal: 'GANAR_MUSCULO',
+      experienceLevel: 'INTERMEDIO',
+      membershipType: 'PREMIUM',
+      joinedAt: new Date('2024-01-10T00:00:00Z'),
+      membershipEnd: new Date('2025-01-10T00:00:00Z'),
+      monthlyPrice: 120000,
+      membershipStatus: 'ACTIVO',
       status: 'ACTIVE',
-      lastAttendance: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+      lastCheckIn: new Date(now - 2 * 24 * 60 * 60 * 1000),
+      checkInsLast30Days: 12,
+      averageCheckInsPerWeek: 3.5,
+      preferredSchedule: 'TARDE',
+      churnRiskScore: 15,
+      churnRiskLevel: 'BAJO',
+      acquisitionSource: 'INSTAGRAM',
+      assignedTrainer: 'Entrenador Juan',
+      notes: 'Muy comprometido, objetivo: ganar 5kg de musculo',
     },
   });
 
-  const client2 = await prisma.client.create({
+  const maria = await prisma.member.create({
     data: {
-      name: 'Jane Smith',
-      email: 'jane@example.com',
-      phone: '+0987654321',
+      name: 'Maria Lopez',
+      email: 'maria@email.com',
+      phone: '+57 301 234 5678',
+      birthDate: new Date('1985-08-22T00:00:00Z'),
+      gender: 'F',
+      goal: 'PERDER_PESO',
+      experienceLevel: 'PRINCIPIANTE',
+      membershipType: 'BASICA',
+      joinedAt: new Date('2024-02-15T00:00:00Z'),
+      membershipEnd: new Date('2025-02-15T00:00:00Z'),
+      monthlyPrice: 80000,
+      membershipStatus: 'ACTIVO',
       status: 'AT_RISK',
-      lastAttendance: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000), // 10 days ago
+      lastCheckIn: new Date(now - 9 * 24 * 60 * 60 * 1000),
+      checkInsLast30Days: 4,
+      averageCheckInsPerWeek: 1.2,
+      preferredSchedule: 'MANANA',
+      churnRiskScore: 72,
+      churnRiskLevel: 'ALTO',
+      acquisitionSource: 'GOOGLE',
+      assignedTrainer: 'Entrenadora Ana',
+      notes: 'Ha faltado mucho ultimamente. Posible riesgo de abandono.',
     },
   });
 
-  const client3 = await prisma.client.create({
-    data: {
-      name: 'Bob Johnson',
-      email: 'bob@example.com',
-      phone: '+1122334455',
-      status: 'INACTIVE',
-      lastAttendance: new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000), // 20 days ago
-    },
-  });
-
-  console.log('✅ Sample clients created');
-
-  // Create sample attendance records
   await prisma.attendance.createMany({
     data: [
       {
-        clientId: client1.id,
-        attendedAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
+        memberId: carlos.id,
+        attendedAt: new Date(now - 2 * 24 * 60 * 60 * 1000),
+        duration: 60,
+        activities: JSON.stringify(['pesas', 'cardio']),
       },
       {
-        clientId: client1.id,
-        attendedAt: new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000),
+        memberId: carlos.id,
+        attendedAt: new Date(now - 6 * 24 * 60 * 60 * 1000),
+        duration: 45,
+        activities: JSON.stringify(['pesas']),
       },
       {
-        clientId: client2.id,
-        attendedAt: new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000),
-      },
-      {
-        clientId: client3.id,
-        attendedAt: new Date(now.getTime() - 20 * 24 * 60 * 60 * 1000),
+        memberId: maria.id,
+        attendedAt: new Date(now - 9 * 24 * 60 * 60 * 1000),
+        duration: 60,
+        activities: JSON.stringify(['cardio']),
       },
     ],
   });
 
-  console.log('✅ Sample attendance records created');
+  await prisma.lead.createMany({
+    data: [
+      {
+        name: 'Roberto Gomez',
+        email: 'roberto@email.com',
+        phone: '+57 305 678 9012',
+        fitnessGoal: 'Perder 10kg en 3 meses',
+        budget: 100000,
+        source: 'INSTAGRAM',
+        status: 'TOUR_AGENDADO',
+        assignedAdvisor: 'Asesor Maria',
+        conversionProbability: 65,
+        notes: 'Interesado en plan premium.',
+      },
+      {
+        name: 'Patricia Ruiz',
+        email: 'patricia@email.com',
+        phone: '+57 306 789 0123',
+        fitnessGoal: 'Tonificar',
+        budget: 80000,
+        source: 'REFERIDO',
+        status: 'PROPUESTA',
+        assignedAdvisor: 'Asesor Carlos',
+        conversionProbability: 80,
+      },
+    ],
+  });
+
+  const treadmill = await prisma.equipment.create({
+    data: {
+      name: 'Cinta de Correr Pro',
+      category: 'CARDIO',
+      brand: 'Technogym',
+      model: 'Run 500',
+      serialNumber: 'TG-2024-001',
+      purchaseDate: new Date('2023-06-15T00:00:00Z'),
+      warrantyEnd: new Date('2025-06-15T00:00:00Z'),
+      price: 8500000,
+      status: 'OPERATIVO',
+      location: 'Zona Cardio',
+      lastMaintenance: new Date(now - 15 * 24 * 60 * 60 * 1000),
+      nextMaintenance: new Date(now + 15 * 24 * 60 * 60 * 1000),
+      maintenanceIntervalDays: 30,
+      totalUsageHours: 450,
+      notes: 'Mantenimiento mensual programado',
+    },
+  });
+
+  await prisma.maintenanceRecord.create({
+    data: {
+      equipmentId: treadmill.id,
+      type: 'PREVENTIVO',
+      description: 'Mantenimiento preventivo mensual',
+      technician: 'Tecnico Juan Perez',
+      cost: 150000,
+      scheduledDate: new Date(now + 15 * 24 * 60 * 60 * 1000),
+      status: 'PENDIENTE',
+    },
+  });
+
+  await prisma.retentionAlert.createMany({
+    data: [
+      {
+        clientId: maria.id,
+        clientName: 'Maria Lopez',
+        type: 'AUSENCIA_PROLONGADA',
+        severity: 'CRITICA',
+        description: 'No ha asistido en 9 dias.',
+        daysSinceLastVisit: 9,
+        recommendedAction: 'Llamada urgente y sesion de re-engagement.',
+        status: 'PENDIENTE',
+      },
+      {
+        clientId: carlos.id,
+        clientName: 'Carlos Rodriguez',
+        type: 'MILESTONE_ALCANZADO',
+        severity: 'INFORMATIVA',
+        description: 'Mantiene alta frecuencia de asistencia.',
+        daysSinceLastVisit: 2,
+        recommendedAction: 'Reconocer progreso y mantener plan.',
+        status: 'PENDIENTE',
+      },
+    ],
+  });
+
+  console.log('✅ Seed completa con datos de prueba');
 }
 
 main()
   .catch((e) => {
     console.error('❌ Seed failed:', e);
+    process.exit(1);
   })
   .finally(async () => {
     await prisma.$disconnect();

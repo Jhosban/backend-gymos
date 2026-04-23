@@ -14,7 +14,7 @@ export class AppConfigService {
   }
 
   get apiPrefix(): string {
-    return this.configService.get<string>('API_PREFIX', 'api/v1');
+    return this.configService.get<string>('API_PREFIX', 'v1');
   }
 
   get jwtSecret(): string {

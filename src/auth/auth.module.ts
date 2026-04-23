@@ -5,12 +5,12 @@ import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { PrismaModule } from '@/prisma/prisma.module';
 import { AppConfigService } from '@/config/app.config';
+import { SharedModule } from '@/shared/shared.module';
 
 @Module({
   imports: [
-    PrismaModule,
+    SharedModule,
     PassportModule,
     JwtModule.registerAsync({
       inject: [ConfigService],

@@ -1,10 +1,8 @@
-import { ClientStatus } from '@prisma/client';
-
 export class ClientStatusDto {
-  id: number;
+  id: string;
   name: string;
   email: string;
-  status: ClientStatus;
+  status: 'ACTIVE' | 'AT_RISK' | 'INACTIVE';
   lastAttendance: Date | null;
   daysSinceAttendance: number | null;
 }
@@ -24,5 +22,5 @@ export class RetentionStatusResponseDto {
 export class RecalculateRetentionResponseDto {
   message: string;
   updatedCount: number;
-  timestamp: Date;
+  timestamp: string;
 }

@@ -1,5 +1,5 @@
-import { ClientStatus } from '@prisma/client';
-import { IsEmail, IsNotEmpty, IsOptional, IsPhoneNumber } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
+import { CreateMemberInput, UpdateMemberInput, Member } from '@/shared/gym-data.service';
 
 export class CreateClientDto {
   @IsNotEmpty()
@@ -8,8 +8,40 @@ export class CreateClientDto {
   @IsEmail()
   email: string;
 
-  @IsPhoneNumber()
   phone: string;
+
+  @IsOptional()
+  goal?: string;
+
+  @IsOptional()
+  experienceLevel?: CreateMemberInput['experienceLevel'];
+
+  @IsOptional()
+  membershipType?: CreateMemberInput['membershipType'];
+
+  @IsOptional()
+  joinedAt?: string;
+
+  @IsOptional()
+  membershipEnd?: string;
+
+  @IsOptional()
+  monthlyPrice?: number;
+
+  @IsOptional()
+  membershipStatus?: CreateMemberInput['membershipStatus'];
+
+  @IsOptional()
+  preferredSchedule?: CreateMemberInput['preferredSchedule'];
+
+  @IsOptional()
+  acquisitionSource?: CreateMemberInput['acquisitionSource'];
+
+  @IsOptional()
+  assignedTrainer?: string;
+
+  @IsOptional()
+  notes?: string;
 }
 
 export class UpdateClientDto {
@@ -21,17 +53,49 @@ export class UpdateClientDto {
   email?: string;
 
   @IsOptional()
-  @IsPhoneNumber()
   phone?: string;
+
+  @IsOptional()
+  goal?: string;
+
+  @IsOptional()
+  experienceLevel?: UpdateMemberInput['experienceLevel'];
+
+  @IsOptional()
+  membershipType?: UpdateMemberInput['membershipType'];
+
+  @IsOptional()
+  joinedAt?: string;
+
+  @IsOptional()
+  membershipEnd?: string;
+
+  @IsOptional()
+  monthlyPrice?: number;
+
+  @IsOptional()
+  membershipStatus?: UpdateMemberInput['membershipStatus'];
+
+  @IsOptional()
+  preferredSchedule?: UpdateMemberInput['preferredSchedule'];
+
+  @IsOptional()
+  acquisitionSource?: UpdateMemberInput['acquisitionSource'];
+
+  @IsOptional()
+  assignedTrainer?: string;
+
+  @IsOptional()
+  notes?: string;
 }
 
 export class ClientResponseDto {
-  id: number;
+  id: string;
   name: string;
   email: string;
   phone: string;
-  status: ClientStatus;
-  lastAttendance: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
+  status: Member['status'];
+  lastCheckIn?: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
