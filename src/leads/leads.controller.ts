@@ -1,7 +1,9 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, NotFoundException } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, NotFoundException, UseGuards } from '@nestjs/common';
 import { GymDataService } from '@/shared/gym-data.service';
+import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 
 @Controller('leads')
+@UseGuards(JwtAuthGuard)
 export class LeadsController {
   constructor(private readonly gymData: GymDataService) {}
 
