@@ -35,6 +35,12 @@ export class ClientsController {
     return { success: true, data };
   }
 
+  @Get('export/csv')
+  @Header('Content-Type', 'text/csv')
+  async exportCsv() {
+    return this.clientsService.exportCsv();
+  }
+
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   async findOne(@Param('id') id: string): Promise<ClientResponseDto> {
@@ -67,11 +73,5 @@ export class ClientsController {
   ) {
     const data = await this.clientsService.recordCheckIn(id, body);
     return { success: true, data } as any;
-  }
-
-  @Get('export/csv')
-  @Header('Content-Type', 'text/csv')
-  async exportCsv() {
-    return this.clientsService.exportCsv();
   }
 }
