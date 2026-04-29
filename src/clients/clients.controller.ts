@@ -10,11 +10,14 @@ import {
   HttpStatus,
   Query,
   Header,
+  UseGuards,
 } from '@nestjs/common';
 import { ClientsService } from './clients.service';
 import { CreateClientDto, UpdateClientDto, ClientResponseDto } from './dtos/client.dto';
+import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 
 @Controller('members')
+@UseGuards(JwtAuthGuard)
 export class ClientsController {
   constructor(private clientsService: ClientsService) {}
 
@@ -30,6 +33,12 @@ export class ClientsController {
   async findAll(@Query() query: { page?: number; limit?: number; search?: string; status?: string; riskLevel?: string }) {
     const data = await this.clientsService.findAll(query);
     return { success: true, data };
+  }
+
+  @Get('export/csv')
+  @Header('Content-Type', 'text/csv')
+  async exportCsv() {
+    return this.clientsService.exportCsv();
   }
 
   @Get(':id')
@@ -64,11 +73,5 @@ export class ClientsController {
   ) {
     const data = await this.clientsService.recordCheckIn(id, body);
     return { success: true, data } as any;
-  }
-
-  @Get('export/csv')
-  @Header('Content-Type', 'text/csv')
-  async exportCsv() {
-    return this.clientsService.exportCsv();
   }
 }

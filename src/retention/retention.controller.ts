@@ -4,6 +4,7 @@ import {
   Post,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { RetentionService } from './retention.service';
 import {
@@ -11,8 +12,10 @@ import {
   RecalculateRetentionResponseDto,
   ClientStatusDto,
 } from './dtos/retention.dto';
+import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 
 @Controller('retention')
+@UseGuards(JwtAuthGuard)
 export class RetentionController {
   constructor(private retentionService: RetentionService) {}
 
