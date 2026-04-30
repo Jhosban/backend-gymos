@@ -76,4 +76,16 @@ export class RetentionService {
       daysSinceAttendance: member.lastCheckIn ? Math.floor((Date.now() - new Date(member.lastCheckIn).getTime()) / (1000 * 60 * 60 * 24)) : null,
     }));
   }
+
+  async getHighRiskClients(): Promise<ClientStatusDto[]> {
+    const members = await this.gymData.getHighRiskMembers();
+    return members.map((member) => ({
+      id: member.id,
+      name: member.name,
+      email: member.email,
+      status: member.status === 'at-risk' ? 'AT_RISK' : member.status === 'active' ? 'ACTIVE' : 'INACTIVE',
+      lastAttendance: member.lastCheckIn ? new Date(member.lastCheckIn) : null,
+      daysSinceAttendance: member.lastCheckIn ? Math.floor((Date.now() - new Date(member.lastCheckIn).getTime()) / (1000 * 60 * 60 * 24)) : null,
+    }));
+  }
 }

@@ -29,7 +29,7 @@ export class AppConfigService {
   }
 
   get retentionAtRiskDays(): number {
-    return this.configService.get<number>('RETENTION_AT_RISK_DAYS', 7);
+    return this.configService.get<number>('RETENTION_AT_RISK_DAYS', 4);
   }
 
   get retentionInactiveDays(): number {
