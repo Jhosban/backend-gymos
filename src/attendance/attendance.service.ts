@@ -23,6 +23,51 @@ export class AttendanceService {
     return this.mapToResponseDto(createAttendanceDto.clientId, attendance);
   }
 
+  async qrCheckIn(payload: { qrData: string; duration?: number; activities?: string[] }) {
+    const { qrData, duration, activities } = payload;
+    let memberId = qrData;
+
+    try {
+      const parsed = JSON.parse(qrData);
+      if (parsed && typeof parsed === 'object' && parsed.memberId) {
+        memberId = parsed.memberId;
+      }
+    } catch {
+      // assume plain id
+    }
+
+    const attendance = await this.gymData.recordCheckIn(memberId, { duration, activities });
+    if (!attendance) throw new NotFoundException(`Member ${memberId} not found`);
+    return { success: true, data: attendance };
+  }
+
+  async registerBiometric(payload: { memberId: string; credentialId: string }) {
+    const { memberId, credentialId } = payload;
+    const updated = await this.gymData.setMemberBiometricCredential(memberId, credentialId);
+    if (!updated) throw new NotFoundException(`Member ${memberId} not found`);
+    return { success: true };
+  }
+
+  async getMemberBiometricStatus(memberId: string) {
+    const has = await this.gymData.hasMemberBiometricCredential(memberId);
+    return { hasCredential: !!has };
+  }
+
+  async biometricCheckin(payload: { memberId: string; credentialId: string; duration?: number; activities?: string[] }) {
+    const { memberId, credentialId, duration, activities } = payload;
+    const has = await this.gymData.hasMemberBiometricCredential(memberId);
+    if (!has) throw new NotFoundException(`Member ${memberId} has no biometric credential`);
+
+    const stored = await this.gymData.getMemberBiometricCredential(memberId);
+    if (stored !== credentialId) {
+      return { success: false, message: 'Credential mismatch' };
+    }
+
+    const attendance = await this.gymData.recordCheckIn(memberId, { duration, activities });
+    if (!attendance) throw new NotFoundException(`Member ${memberId} not found`);
+    return { success: true, data: attendance };
+  }
+
   async findByClientId(clientId: string): Promise<AttendanceResponseDto[]> {
     const client = await this.gymData.getMember(clientId);
     if (!client) {

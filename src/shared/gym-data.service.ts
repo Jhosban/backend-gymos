@@ -72,6 +72,7 @@ export type Member = {
   attendance: AttendanceRecord[];
   createdAt: string;
   updatedAt: string;
+  hasBiometricCredential?: boolean;
 };
 
 export type Lead = {
@@ -509,6 +510,9 @@ export class GymDataService {
       attendance,
       createdAt: member.createdAt.toISOString(),
       updatedAt: member.updatedAt.toISOString(),
+      // Indica si tiene credencial biométrica registrada
+      // (no exponemos el id por seguridad)
+      hasBiometricCredential: !!(member as any).biometricCredentialId,
     };
   }
 
@@ -728,6 +732,25 @@ export class GymDataService {
     });
 
     return this.toMemberDTO(updated);
+  }
+
+  async setMemberBiometricCredential(memberId: string, credentialId: string): Promise<boolean> {
+    try {
+      const updated = await this.prisma.member.update({ where: { id: memberId }, data: { biometricCredentialId: credentialId }, include: { attendance: true } });
+      return !!updated;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  async hasMemberBiometricCredential(memberId: string): Promise<boolean> {
+    const m = await this.prisma.member.findUnique({ where: { id: memberId } });
+    return !!m?.biometricCredentialId;
+  }
+
+  async getMemberBiometricCredential(memberId: string): Promise<string | null> {
+    const m = await this.prisma.member.findUnique({ where: { id: memberId } });
+    return m?.biometricCredentialId ?? null;
   }
 
   async deleteMember(id: string): Promise<boolean> {
