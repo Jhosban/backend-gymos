@@ -17,11 +17,11 @@ import { CreateClientDto, UpdateClientDto, ClientResponseDto } from './dtos/clie
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 
 @Controller('members')
-@UseGuards(JwtAuthGuard)
 export class ClientsController {
   constructor(private clientsService: ClientsService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createClientDto: CreateClientDto): Promise<ClientResponseDto> {
     const data = await this.clientsService.create(createClientDto);
@@ -36,12 +36,14 @@ export class ClientsController {
   }
 
   @Get('export/csv')
+  @UseGuards(JwtAuthGuard)
   @Header('Content-Type', 'text/csv')
   async exportCsv() {
     return this.clientsService.exportCsv();
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async findOne(@Param('id') id: string): Promise<ClientResponseDto> {
     const data = await this.clientsService.findOne(id);
@@ -49,6 +51,7 @@ export class ClientsController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async update(
     @Param('id') id: string,
@@ -59,6 +62,7 @@ export class ClientsController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async delete(@Param('id') id: string): Promise<{ message: string }> {
     const data = await this.clientsService.delete(id);
@@ -66,6 +70,7 @@ export class ClientsController {
   }
 
   @Post(':id/checkin')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   async recordCheckIn(
     @Param('id') id: string,
