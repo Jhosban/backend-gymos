@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '@/prisma/prisma.service';
+import { AppConfigService } from '@/config/app.config';
 
 type ExperienceLevel = 'PRINCIPIANTE' | 'INTERMEDIO' | 'AVANZADO';
 type MembershipStatus = 'ACTIVO' | 'CONGELADO' | 'VENCIDO' | 'CANCELADO';
@@ -224,7 +225,10 @@ export type CheckInInput = {
 
 @Injectable()
 export class GymDataService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private config: AppConfigService,
+  ) {}
 
   private daysBetween(from: string, to = new Date().toISOString()): number {
     return Math.floor((new Date(to).getTime() - new Date(from).getTime()) / (1000 * 60 * 60 * 24));
@@ -427,8 +431,8 @@ export class GymDataService {
   private calculateStatus(lastCheckIn?: string | null): ClientStatus {
     if (!lastCheckIn) return 'inactive';
     const days = this.daysBetween(lastCheckIn);
-    if (days <= 7) return 'active';
-    if (days <= 21) return 'at-risk';
+    if (days <= this.config.retentionAtRiskDays) return 'active';
+    if (days <= this.config.retentionInactiveDays) return 'at-risk';
     return 'inactive';
   }
 
@@ -1420,6 +1424,20 @@ export class GymDataService {
     });
 
     return members.map((member) => this.toMemberDTO(member));
+  }
+
+  async getHighRiskMembers(): Promise<Member[]> {
+    const members = await this.prisma.member.findMany({
+      where: { lastCheckIn: { not: null } },
+      include: { attendance: true },
+    });
+
+    return members
+      .map((member) => this.toMemberDTO(member))
+      .filter((member) => {
+        const churn = this.calculateChurnRisk(member);
+        return churn.level === 'alto' || churn.level === 'critico';
+      });
   }
 
   // Dashboard
