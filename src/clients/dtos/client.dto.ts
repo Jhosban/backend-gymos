@@ -8,6 +8,7 @@ export class CreateClientDto {
   @IsEmail()
   email: string;
 
+  @IsNotEmpty()
   phone: string;
 
   @IsOptional()

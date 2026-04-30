@@ -1,3 +1,15 @@
+/**
+ * Prisma Seed Script for GymOS Backend
+ * 
+ * This script initializes the database with sample data for development.
+ * 
+ * Default Admin User Credentials:
+ *   Email: admin@gym.com
+ *   Password: password123
+ * 
+ * WARNING: Change these credentials in production!
+ */
+
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 
