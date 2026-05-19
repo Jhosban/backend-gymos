@@ -16,7 +16,7 @@ type PrismaMaintenanceType = 'PREVENTIVO' | 'CORRECTIVO' | 'INSPECCION';
 type PrismaAlertType = 'AUSENCIA_PROLONGADA' | 'PAGO_FALLIDO' | 'BAJO_ENGAGEMENT' | 'QUEJA_RECIENTE' | 'CUMPLEANOS_PROXIMO' | 'MILESTONE_ALCANZADO';
 type PrismaAlertSeverity = 'INFORMATIVA' | 'ACCION_REQUERIDA' | 'CRITICA';
 type PrismaAlertStatus = 'PENDIENTE' | 'EN_PROGRESO' | 'RESUELTA';
-type UserRole = 'ADMIN' | 'TRAINER' | 'ADVISOR';
+type UserRole = 'ADMIN' | 'TRAINER' | 'ADVISOR' | 'USER';
 
 export type PaginationMeta = {
   page: number;
@@ -145,7 +145,7 @@ export type User = {
   email: string;
   name: string;
   password: string;
-  role: 'admin' | 'trainer' | 'advisor';
+  role: 'admin' | 'trainer' | 'advisor' | 'user';
   createdAt: string;
   updatedAt: string;
 };
