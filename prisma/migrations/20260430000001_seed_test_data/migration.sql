@@ -1,0 +1,2 @@
+-- Seed test data
+-- Este archivo está vacío para cumplir con Prisma, los seeds se manejan en seed.ts
