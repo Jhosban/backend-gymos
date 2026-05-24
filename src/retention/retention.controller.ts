@@ -36,4 +36,10 @@ export class RetentionController {
   async getAtRiskClients(): Promise<ClientStatusDto[]> {
     return this.retentionService.getAtRiskClients();
   }
+
+  @Get('high-risk')
+  @HttpCode(HttpStatus.OK)
+  async getHighRiskClients(): Promise<ClientStatusDto[]> {
+    return this.retentionService.getHighRiskClients();
+  }
 }

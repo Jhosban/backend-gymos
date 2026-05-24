@@ -24,3 +24,21 @@ export class AttendanceResponseDto {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export class QrCheckInDto {
+  qrData: string;
+  duration?: number;
+  activities?: string[];
+}
+
+export class BiometricRegisterDto {
+  memberId: string;
+  credentialId: string;
+}
+
+export class BiometricCheckinDto {
+  memberId: string;
+  credentialId: string;
+  duration?: number;
+  activities?: string[];
+}

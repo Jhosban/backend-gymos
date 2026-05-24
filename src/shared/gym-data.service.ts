@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '@/prisma/prisma.service';
+import { AppConfigService } from '@/config/app.config';
 
 type ExperienceLevel = 'PRINCIPIANTE' | 'INTERMEDIO' | 'AVANZADO';
 type MembershipStatus = 'ACTIVO' | 'CONGELADO' | 'VENCIDO' | 'CANCELADO';
@@ -30,6 +31,61 @@ export type ChurnRiskLevel = 'bajo' | 'medio' | 'alto' | 'critico';
 export type MembershipType = 'basica' | 'premium' | 'vip' | 'estudiante';
 export type LeadStatus = 'nuevo' | 'contactado' | 'tour_agendado' | 'tour_realizado' | 'propuesta' | 'negociacion' | 'cerrado_ganado' | 'cerrado_perdido';
 export type LeadSourceType = 'instagram' | 'google' | 'referido' | 'walk_in' | 'facebook' | 'calle';
+export type ProductType = 'fitness_product' | 'membership' | 'personal_training' | 'combo';
+export type ServiceType = 'basica' | 'premium' | 'vip' | 'estudiante' | 'individual' | 'grupal' | 'funcional';
+
+// Product-specific details types
+export type MembershipDetails = {
+  membershipType: string; // e.g., "basica", "premium", "vip", "estudiante"
+  durationMonths: number;
+  pricePerPeriod: number;
+  periodicity: 'monthly' | 'quarterly' | 'annual';
+  startDate: string;
+  endDate?: string;
+  autoRenewal: boolean;
+  includedAccess: string[]; // e.g., ["gym", "pool", "sauna"]
+  enrollmentFee: number;
+};
+
+export type PersonalTrainingDetails = {
+  serviceType: 'individual' | 'group' | 'functional';
+  assignedTrainer?: string;
+  numberOfSessions: number;
+  sessionDurationMinutes: number;
+  modality: 'in-person' | 'virtual' | 'hybrid';
+  pricePerSession: number;
+  packagePrice?: number;
+  firstSessionDate: string;
+  clientObjective: string;
+  initialEvaluationRequired: boolean;
+};
+
+export type FitnessProductDetails = {
+  productName: string;
+  sku: string;
+  category: 'equipment' | 'supplements' | 'clothing';
+  quantity: number;
+  unitPrice: number;
+  size?: string;
+  color?: string;
+  availableStock: number;
+  brand: string;
+};
+
+export type ComboDetails = {
+  comboType: string;
+  components: Array<{
+    type: 'membership' | 'product' | 'training';
+    description: string;
+    value?: number;
+  }>;
+  normalPrice: number;
+  discountedPrice: number;
+  discountPercentage: number;
+  isRecurring: boolean;
+};
+
+export type ProductDetails = MembershipDetails | PersonalTrainingDetails | FitnessProductDetails | ComboDetails;
 export type EquipmentCategory = 'cardio' | 'pesas' | 'maquinas' | 'funcional' | 'accesorios';
 export type EquipmentStatus = 'operativo' | 'en_mantenimiento' | 'fuera_servicio' | 'nuevo';
 export type MaintenanceType = 'preventivo' | 'correctivo' | 'inspeccion';
@@ -72,6 +128,7 @@ export type Member = {
   attendance: AttendanceRecord[];
   createdAt: string;
   updatedAt: string;
+  hasBiometricCredential?: boolean;
 };
 
 export type Lead = {
@@ -79,12 +136,11 @@ export type Lead = {
   name: string;
   email: string;
   phone: string;
-  fitnessGoal: string;
-  budget: number;
   source: LeadSourceType;
   status: LeadStatus;
   assignedAdvisor: string;
-  conversionProbability: number;
+  productType: ProductType;
+  productDetails?: ProductDetails | null;
   notes?: string;
   createdAt: string;
   updatedAt: string;
@@ -190,9 +246,9 @@ export type CreateLeadInput = Partial<Lead> & {
   name: string;
   email: string;
   phone: string;
-  fitnessGoal: string;
-  budget: number;
   source: LeadSourceType;
+  productType?: ProductType;
+  productDetails?: Record<string, any>;
 };
 
 export type UpdateLeadInput = Partial<CreateLeadInput>;
@@ -224,7 +280,10 @@ export type CheckInInput = {
 
 @Injectable()
 export class GymDataService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private config: AppConfigService,
+  ) {}
 
   private daysBetween(from: string, to = new Date().toISOString()): number {
     return Math.floor((new Date(to).getTime() - new Date(from).getTime()) / (1000 * 60 * 60 * 24));
@@ -427,8 +486,8 @@ export class GymDataService {
   private calculateStatus(lastCheckIn?: string | null): ClientStatus {
     if (!lastCheckIn) return 'inactive';
     const days = this.daysBetween(lastCheckIn);
-    if (days <= 7) return 'active';
-    if (days <= 21) return 'at-risk';
+    if (days <= this.config.retentionAtRiskDays) return 'active';
+    if (days <= this.config.retentionInactiveDays) return 'at-risk';
     return 'inactive';
   }
 
@@ -464,12 +523,19 @@ export class GymDataService {
     return { score: capped, level };
   }
 
-  private calculateLeadProbability(lead: Partial<Lead>): number {
-    let probability = 30;
-    if (lead.source === 'referido') probability += 25;
-    if (lead.source === 'instagram') probability += 15;
-    if ((lead.budget ?? 0) >= 100000) probability += 10;
-    return Math.min(probability, 95);
+  private toProductType(type: string): ProductType {
+    if (type === 'MEMBERSHIP') return 'membership';
+    if (type === 'PERSONAL_TRAINING') return 'personal_training';
+    if (type === 'COMBO') return 'combo';
+    return 'fitness_product';
+  }
+
+  private fromProductType(type?: string): string | undefined {
+    if (!type) return 'FITNESS_PRODUCT';
+    if (type === 'membership' || type === 'MEMBERSHIP') return 'MEMBERSHIP';
+    if (type === 'personal_training' || type === 'PERSONAL_TRAINING') return 'PERSONAL_TRAINING';
+    if (type === 'combo' || type === 'COMBO') return 'COMBO';
+    return 'FITNESS_PRODUCT';
   }
 
   private toMemberDTO(member: Prisma.MemberGetPayload<{ include: { attendance: true } }>): Member {
@@ -509,6 +575,9 @@ export class GymDataService {
       attendance,
       createdAt: member.createdAt.toISOString(),
       updatedAt: member.updatedAt.toISOString(),
+      // Indica si tiene credencial biométrica registrada
+      // (no exponemos el id por seguridad)
+      hasBiometricCredential: !!(member as any).biometricCredentialId,
     };
   }
 
@@ -730,6 +799,25 @@ export class GymDataService {
     return this.toMemberDTO(updated);
   }
 
+  async setMemberBiometricCredential(memberId: string, credentialId: string): Promise<boolean> {
+    try {
+      const updated = await this.prisma.member.update({ where: { id: memberId }, data: { biometricCredentialId: credentialId }, include: { attendance: true } });
+      return !!updated;
+    } catch (err) {
+      return false;
+    }
+  }
+
+  async hasMemberBiometricCredential(memberId: string): Promise<boolean> {
+    const m = await this.prisma.member.findUnique({ where: { id: memberId } });
+    return !!m?.biometricCredentialId;
+  }
+
+  async getMemberBiometricCredential(memberId: string): Promise<string | null> {
+    const m = await this.prisma.member.findUnique({ where: { id: memberId } });
+    return m?.biometricCredentialId ?? null;
+  }
+
   async deleteMember(id: string): Promise<boolean> {
     const result = await this.prisma.member.deleteMany({ where: { id } });
     await this.prisma.retentionAlert.deleteMany({ where: { clientId: id } });
@@ -835,12 +923,11 @@ export class GymDataService {
         name: lead.name,
         email: lead.email,
         phone: lead.phone,
-        fitnessGoal: lead.fitnessGoal,
-        budget: lead.budget,
         source: this.toLeadSource(lead.source),
         status: this.toLeadStatus(lead.status),
         assignedAdvisor: lead.assignedAdvisor,
-        conversionProbability: lead.conversionProbability,
+        productType: this.toProductType(lead.productType),
+        productDetails: lead.productDetails ? (typeof lead.productDetails === 'string' ? JSON.parse(lead.productDetails) : lead.productDetails) : undefined,
         notes: lead.notes ?? undefined,
         createdAt: lead.createdAt.toISOString(),
         updatedAt: lead.updatedAt.toISOString(),
@@ -862,21 +949,55 @@ export class GymDataService {
       name: lead.name,
       email: lead.email,
       phone: lead.phone,
-      fitnessGoal: lead.fitnessGoal,
-      budget: lead.budget,
       source: this.toLeadSource(lead.source),
       status: this.toLeadStatus(lead.status),
       assignedAdvisor: lead.assignedAdvisor,
-      conversionProbability: lead.conversionProbability,
+      productType: this.toProductType(lead.productType),
+      productDetails: lead.productDetails ? (typeof lead.productDetails === 'string' ? JSON.parse(lead.productDetails) : lead.productDetails) : undefined,
       notes: lead.notes ?? undefined,
       createdAt: lead.createdAt.toISOString(),
       updatedAt: lead.updatedAt.toISOString(),
     };
   }
 
+  async findLeadByEmailAndProductType(email: string, productType: string): Promise<Lead | undefined> {
+    const existing = await this.prisma.lead.findFirst({
+      where: {
+        email: { equals: email, mode: 'insensitive' },
+        productType: this.fromProductType(productType) ?? 'FITNESS_PRODUCT',
+      },
+    });
+    if (!existing) return undefined;
+    return {
+      id: existing.id,
+      name: existing.name,
+      email: existing.email,
+      phone: existing.phone,
+      source: this.toLeadSource(existing.source),
+      status: this.toLeadStatus(existing.status),
+      assignedAdvisor: existing.assignedAdvisor,
+      productType: this.toProductType(existing.productType),
+      productDetails: existing.productDetails ? (typeof existing.productDetails === 'string' ? JSON.parse(existing.productDetails) : existing.productDetails) : undefined,
+      notes: existing.notes ?? undefined,
+      createdAt: existing.createdAt.toISOString(),
+      updatedAt: existing.updatedAt.toISOString(),
+    };
+  }
+
   async createLead(input: CreateLeadInput): Promise<Lead> {
     const source = input.source === 'calle' ? 'walk_in' : input.source;
-    const probability = this.calculateLeadProbability({ ...input, source });
+
+    // Check for duplicates: same email and productType (case-insensitive)
+    const existing = await this.prisma.lead.findFirst({
+      where: {
+        email: { equals: input.email, mode: 'insensitive' },
+        productType: this.fromProductType(input.productType) ?? 'FITNESS_PRODUCT',
+      },
+    });
+
+    if (existing) {
+      throw new Error(`Lead duplicado: Ya existe un lead con email "${input.email}" del tipo "${input.productType}"`);
+    }
 
     const lead = await this.prisma.lead.create({
       data: {
@@ -884,12 +1005,11 @@ export class GymDataService {
         name: input.name,
         email: input.email,
         phone: input.phone,
-        fitnessGoal: input.fitnessGoal,
-        budget: input.budget,
         source: this.fromLeadSource(source) ?? 'GOOGLE',
         status: this.fromLeadStatus(input.status) ?? 'NUEVO',
         assignedAdvisor: input.assignedAdvisor ?? 'Sin asignar',
-        conversionProbability: probability,
+        productType: this.fromProductType(input.productType) ?? 'FITNESS_PRODUCT',
+        productDetails: input.productDetails ?? null,
         notes: input.notes,
       },
     });
@@ -899,12 +1019,11 @@ export class GymDataService {
       name: lead.name,
       email: lead.email,
       phone: lead.phone,
-      fitnessGoal: lead.fitnessGoal,
-      budget: lead.budget,
       source: this.toLeadSource(lead.source),
       status: this.toLeadStatus(lead.status),
       assignedAdvisor: lead.assignedAdvisor,
-      conversionProbability: lead.conversionProbability,
+      productType: this.toProductType(lead.productType),
+      productDetails: lead.productDetails ? (typeof lead.productDetails === 'string' ? JSON.parse(lead.productDetails) : lead.productDetails) : undefined,
       notes: lead.notes ?? undefined,
       createdAt: lead.createdAt.toISOString(),
       updatedAt: lead.updatedAt.toISOString(),
@@ -915,25 +1034,18 @@ export class GymDataService {
     const existing = await this.prisma.lead.findUnique({ where: { id } });
     if (!existing) return undefined;
 
-    const source = input.source ? (input.source === 'calle' ? 'walk_in' : input.source) : this.toLeadSource(existing.source);
-    const probability = this.calculateLeadProbability({
-      source,
-      budget: input.budget ?? existing.budget,
-    });
-
     const lead = await this.prisma.lead.update({
       where: { id },
       data: {
         name: input.name,
         email: input.email,
         phone: input.phone,
-        fitnessGoal: input.fitnessGoal,
-        budget: input.budget,
-        source: this.fromLeadSource(source),
+        source: input.source ? this.fromLeadSource(input.source) : undefined,
         status: this.fromLeadStatus(input.status),
         assignedAdvisor: input.assignedAdvisor,
         notes: input.notes,
-        conversionProbability: probability,
+        productType: input.productType ? this.fromProductType(input.productType) : undefined,
+        productDetails: input.productDetails ?? undefined,
       },
     });
 
@@ -942,12 +1054,11 @@ export class GymDataService {
       name: lead.name,
       email: lead.email,
       phone: lead.phone,
-      fitnessGoal: lead.fitnessGoal,
-      budget: lead.budget,
       source: this.toLeadSource(lead.source),
       status: this.toLeadStatus(lead.status),
       assignedAdvisor: lead.assignedAdvisor,
-      conversionProbability: lead.conversionProbability,
+      productType: this.toProductType(lead.productType),
+      productDetails: lead.productDetails ? (typeof lead.productDetails === 'string' ? JSON.parse(lead.productDetails) : lead.productDetails) : undefined,
       notes: lead.notes ?? undefined,
       createdAt: lead.createdAt.toISOString(),
       updatedAt: lead.updatedAt.toISOString(),
@@ -1422,6 +1533,20 @@ export class GymDataService {
     return members.map((member) => this.toMemberDTO(member));
   }
 
+  async getHighRiskMembers(): Promise<Member[]> {
+    const members = await this.prisma.member.findMany({
+      where: { lastCheckIn: { not: null } },
+      include: { attendance: true },
+    });
+
+    return members
+      .map((member) => this.toMemberDTO(member))
+      .filter((member) => {
+        const churn = this.calculateChurnRisk(member);
+        return churn.level === 'alto' || churn.level === 'critico';
+      });
+  }
+
   // Dashboard
   async getDashboardMetrics(): Promise<{
     totalMembers: number;
@@ -1474,15 +1599,12 @@ export class GymDataService {
     const data: { stage: string; count: number; value: number }[] = [];
 
     for (const stage of stages) {
-      const [count, budget] = await Promise.all([
-        this.prisma.lead.count({ where: { status: stage } }),
-        this.prisma.lead.aggregate({ where: { status: stage }, _sum: { budget: true } }),
-      ]);
+      const count = await this.prisma.lead.count({ where: { status: stage } });
 
       data.push({
         stage: stage.toLowerCase(),
         count,
-        value: Number(budget._sum.budget ?? 0),
+        value: 0, // Budget field no longer exists
       });
     }
 
