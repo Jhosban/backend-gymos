@@ -1,6 +1,6 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, BadRequestException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { RegisterDto, LoginDto, AuthResponseDto } from './dtos/auth.dto';
+import { SignupDto, LoginDto, AuthResponseDto } from './dtos/auth.dto';
 import * as bcrypt from 'bcryptjs';
 import { AppConfigService } from '@/config/app.config';
 import { GymDataService } from '@/shared/gym-data.service';
@@ -13,17 +13,27 @@ export class AuthService {
     private gymData: GymDataService,
   ) {}
 
-  async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
-    const { email, name, password } = registerDto;
+  async signup(signupDto: SignupDto): Promise<AuthResponseDto> {
+    const { email, name, password } = signupDto;
+
+    // Validate name
+    if (!name || name.trim().length < 3) {
+      throw new BadRequestException('El nombre debe tener al menos 3 caracteres');
+    }
+
+    // Validate password length
+    if (!password || password.length < 6) {
+      throw new BadRequestException('La contraseña debe tener al menos 6 caracteres');
+    }
 
     // Check if user already exists
     const existingUser = await this.gymData.findUserByEmail(email);
 
     if (existingUser) {
-      throw new ConflictException('Email already registered');
+      throw new ConflictException('El email ya está registrado');
     }
 
-    const user = await this.gymData.createUser(email, name, password, 'admin');
+    const user = await this.gymData.createUser(email, name, password, 'user');
 
     // Generate JWT token
     const token = this.jwtService.sign(
@@ -49,14 +59,14 @@ export class AuthService {
     const user = await this.gymData.findUserByEmail(email);
 
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Email o contraseña inválidos');
     }
 
     // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Email o contraseña inválidos');
     }
 
     // Generate JWT token

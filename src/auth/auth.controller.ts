@@ -1,15 +1,15 @@
 import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto, AuthResponseDto } from './dtos/auth.dto';
+import { SignupDto, LoginDto, AuthResponseDto } from './dtos/auth.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Post('register')
+  @Post('signup')
   @HttpCode(HttpStatus.CREATED)
-  async register(@Body() registerDto: RegisterDto): Promise<AuthResponseDto> {
-    const data = await this.authService.register(registerDto);
+  async signup(@Body() signupDto: SignupDto): Promise<AuthResponseDto> {
+    const data = await this.authService.signup(signupDto);
     return { success: true, data } as any;
   }
 
