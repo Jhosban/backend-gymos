@@ -1,5 +1,5 @@
 -- AlterTable
-ALTER TABLE "leads" DROP COLUMN "fitnessGoal",
-DROP COLUMN "budget",
-DROP COLUMN "conversionProbability",
-DROP COLUMN "serviceType";
+ALTER TABLE "leads" DROP COLUMN IF EXISTS "fitnessGoal",
+DROP COLUMN IF EXISTS "budget",
+DROP COLUMN IF EXISTS "conversionProbability",
+DROP COLUMN IF EXISTS "serviceType";

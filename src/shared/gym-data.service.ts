@@ -526,6 +526,7 @@ export class GymDataService {
   private toProductType(type: string): ProductType {
     if (type === 'MEMBERSHIP') return 'membership';
     if (type === 'PERSONAL_TRAINING') return 'personal_training';
+    if (type === 'COMBO') return 'combo';
     return 'fitness_product';
   }
 
@@ -533,6 +534,7 @@ export class GymDataService {
     if (!type) return 'FITNESS_PRODUCT';
     if (type === 'membership' || type === 'MEMBERSHIP') return 'MEMBERSHIP';
     if (type === 'personal_training' || type === 'PERSONAL_TRAINING') return 'PERSONAL_TRAINING';
+    if (type === 'combo' || type === 'COMBO') return 'COMBO';
     return 'FITNESS_PRODUCT';
   }
 
@@ -958,8 +960,44 @@ export class GymDataService {
     };
   }
 
+  async findLeadByEmailAndProductType(email: string, productType: string): Promise<Lead | undefined> {
+    const existing = await this.prisma.lead.findFirst({
+      where: {
+        email: { equals: email, mode: 'insensitive' },
+        productType: this.fromProductType(productType) ?? 'FITNESS_PRODUCT',
+      },
+    });
+    if (!existing) return undefined;
+    return {
+      id: existing.id,
+      name: existing.name,
+      email: existing.email,
+      phone: existing.phone,
+      source: this.toLeadSource(existing.source),
+      status: this.toLeadStatus(existing.status),
+      assignedAdvisor: existing.assignedAdvisor,
+      productType: this.toProductType(existing.productType),
+      productDetails: existing.productDetails ? (typeof existing.productDetails === 'string' ? JSON.parse(existing.productDetails) : existing.productDetails) : undefined,
+      notes: existing.notes ?? undefined,
+      createdAt: existing.createdAt.toISOString(),
+      updatedAt: existing.updatedAt.toISOString(),
+    };
+  }
+
   async createLead(input: CreateLeadInput): Promise<Lead> {
     const source = input.source === 'calle' ? 'walk_in' : input.source;
+
+    // Check for duplicates: same email and productType (case-insensitive)
+    const existing = await this.prisma.lead.findFirst({
+      where: {
+        email: { equals: input.email, mode: 'insensitive' },
+        productType: this.fromProductType(input.productType) ?? 'FITNESS_PRODUCT',
+      },
+    });
+
+    if (existing) {
+      throw new Error(`Lead duplicado: Ya existe un lead con email "${input.email}" del tipo "${input.productType}"`);
+    }
 
     const lead = await this.prisma.lead.create({
       data: {
