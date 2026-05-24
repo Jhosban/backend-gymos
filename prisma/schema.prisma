@@ -73,22 +73,22 @@ model Attendance {
 }
 
 model Lead {
-  id                    String   @id @default(cuid())
-  name                  String
-  email                 String
-  phone                 String
-  fitnessGoal           String
-  budget                Float
-  source                String
-  status                String   @default("NUEVO")
-  assignedAdvisor       String
-  conversionProbability Int      @default(30)
-  notes                 String?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id              String   @id @default(cuid())
+  name            String
+  email           String
+  phone           String
+  source          String
+  status          String   @default("NUEVO")
+  assignedAdvisor String
+  productType     String   @default("FITNESS_PRODUCT")
+  productDetails  Json?
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@index([status])
   @@index([source])
+  @@index([productType])
   @@map("leads")
 }
 
