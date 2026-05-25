@@ -4,6 +4,16 @@ import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '@/prisma/prisma.service';
 import { AppConfigService } from '@/config/app.config';
 
+let cachedGymId: string | null = null;
+
+async function getDefaultGymId(prisma: PrismaService): Promise<string> {
+  if (cachedGymId) return cachedGymId;
+  const gym = await prisma.gym.findFirst();
+  if (!gym) throw new Error('No gym found');
+  cachedGymId = gym.id;
+  return gym.id;
+}
+
 type ExperienceLevel = 'PRINCIPIANTE' | 'INTERMEDIO' | 'AVANZADO';
 type MembershipStatus = 'ACTIVO' | 'CONGELADO' | 'VENCIDO' | 'CANCELADO';
 type PreferredSchedule = 'MANANA' | 'TARDE' | 'NOCHE';
@@ -719,9 +729,12 @@ export class GymDataService {
     const status = this.calculateStatus(provisional.lastCheckIn);
     const churn = this.calculateChurnRisk(provisional);
 
+    const gymId = await getDefaultGymId(this.prisma);
+
     const member = await this.prisma.member.create({
       data: {
         ...(input.id ? { id: input.id } : {}),
+        gymId,
         name: input.name,
         email: input.email,
         phone: input.phone,
@@ -999,9 +1012,12 @@ export class GymDataService {
       throw new Error(`Lead duplicado: Ya existe un lead con email "${input.email}" del tipo "${input.productType}"`);
     }
 
+    const gymId = await getDefaultGymId(this.prisma);
+
     const lead = await this.prisma.lead.create({
       data: {
         ...(input.id ? { id: input.id } : {}),
+        gymId,
         name: input.name,
         email: input.email,
         phone: input.phone,
@@ -1155,9 +1171,12 @@ export class GymDataService {
   }
 
   async createEquipment(input: CreateEquipmentInput): Promise<Equipment> {
+    const gymId = await getDefaultGymId(this.prisma);
+
     const item = await this.prisma.equipment.create({
       data: {
         ...(input.id ? { id: input.id } : {}),
+        gymId,
         name: input.name,
         category: this.fromEquipmentCategory(input.category) ?? 'CARDIO',
         brand: input.brand,

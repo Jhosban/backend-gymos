@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, MinLength, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, MinLength, IsString, IsOptional } from 'class-validator';
 
 export class SignupDto {
   @IsEmail()
@@ -11,6 +11,10 @@ export class SignupDto {
   @IsNotEmpty()
   @MinLength(6)
   password: string;
+
+  @IsOptional()
+  @IsString()
+  plan?: string;
 }
 
 export class LoginDto {
@@ -28,5 +32,6 @@ export class AuthResponseDto {
     email: string;
     name: string;
     role?: 'admin' | 'trainer' | 'advisor' | 'user';
+    gymId?: string;
   };
 }

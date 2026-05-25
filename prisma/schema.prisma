@@ -13,14 +13,94 @@ model User {
   name      String
   password  String
   role      String   @default("ADMIN")
+  gymId     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  gym Gym? @relation(fields: [gymId], references: [id], onDelete: SetNull)
 
   @@map("users")
 }
 
+model Gym {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  email     String?
+  phone     String?
+  address   String?
+  logoUrl   String?
+  plan      String   @default("BASIC")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users      User[]
+  members    Member[]
+  leads      Lead[]
+  equipment  Equipment[]
+  employees  Employee[]
+  gymModules GymModule[]
+
+  @@map("gyms")
+}
+
+model Module {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  name        String
+  description String?
+  price       Float    @default(0)
+  icon        String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  gymModules GymModule[]
+
+  @@map("modules")
+}
+
+model GymModule {
+  id          String    @id @default(cuid())
+  gymId       String
+  moduleId    String
+  status      String    @default("TRIAL")
+  activatedAt DateTime?
+  trialEndsAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  gym    Gym    @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@unique([gymId, moduleId])
+  @@map("gym_modules")
+}
+
+model Employee {
+  id         String   @id @default(cuid())
+  gymId      String
+  employeeId String
+  fullName   String
+  role       String
+  schedule   String?
+  salary     Float?
+  photoUrl   String?
+  email      String?
+  phone      String?
+  status     String   @default("active")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  gym Gym @relation(fields: [gymId], references: [id], onDelete: Cascade)
+
+  @@index([gymId])
+  @@map("employees")
+}
+
 model Member {
   id                     String       @id @default(cuid())
+  gymId                  String
   name                   String
   email                  String       @unique
   phone                  String
@@ -47,11 +127,13 @@ model Member {
   updatedAt              DateTime     @updatedAt
   biometricCredentialId  String?      @unique
 
+  gym        Gym         @relation(fields: [gymId], references: [id], onDelete: Cascade)
   attendance Attendance[]
 
   @@index([status])
   @@index([churnRiskLevel])
   @@index([membershipStatus])
+  @@index([gymId])
   @@map("members")
 }
 
@@ -74,6 +156,7 @@ model Attendance {
 
 model Lead {
   id              String   @id @default(cuid())
+  gymId           String
   name            String
   email           String
   phone           String
@@ -86,14 +169,18 @@ model Lead {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
+  gym Gym @relation(fields: [gymId], references: [id], onDelete: Cascade)
+
   @@index([status])
   @@index([source])
   @@index([productType])
+  @@index([gymId])
   @@map("leads")
 }
 
 model Equipment {
   id                      String              @id @default(cuid())
+  gymId                   String
   name                    String
   category                String
   brand                   String?
@@ -112,10 +199,12 @@ model Equipment {
   createdAt               DateTime            @default(now())
   updatedAt               DateTime            @updatedAt
 
+  gym                 Gym                  @relation(fields: [gymId], references: [id], onDelete: Cascade)
   maintenanceHistory MaintenanceRecord[]
 
   @@index([status])
   @@index([category])
+  @@index([gymId])
   @@map("equipment")
 }
 
