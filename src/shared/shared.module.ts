@@ -7,6 +7,6 @@ import { AppConfigService } from '@/config/app.config';
 @Module({
   imports: [PrismaModule],
   providers: [GymDataService, AppConfigService],
-  exports: [GymDataService, AppConfigService],
+  exports: [GymDataService, AppConfigService, PrismaModule],
 })
 export class SharedModule {}
