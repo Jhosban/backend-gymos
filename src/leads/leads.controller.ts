@@ -3,9 +3,12 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { GymDataService } from '@/shared/gym-data.service';
 import { ExcelService } from '@/excel/excel.service';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
+import { ModuleGuard, RequireModule } from '@/common/guards/module.guard';
 import { Response as ExpressResponse } from 'express';
 
 @Controller('leads')
+@UseGuards(JwtAuthGuard, ModuleGuard)
+@RequireModule('pipeline')
 export class LeadsController {
   constructor(
     private readonly gymData: GymDataService,

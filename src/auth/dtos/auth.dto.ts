@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, MinLength, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, MinLength, IsString, IsOptional } from 'class-validator';
 
 export class SignupDto {
   @IsEmail()
@@ -11,6 +11,10 @@ export class SignupDto {
   @IsNotEmpty()
   @MinLength(6)
   password: string;
+
+  @IsOptional()
+  @IsString()
+  plan?: string;
 }
 
 export class LoginDto {
@@ -21,6 +25,17 @@ export class LoginDto {
   password: string;
 }
 
+export class ChangePasswordDto {
+  @IsNotEmpty({ message: 'La contraseña actual es requerida' })
+  @IsString()
+  currentPassword: string;
+
+  @IsNotEmpty({ message: 'La nueva contraseña es requerida' })
+  @IsString()
+  @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres' })
+  newPassword: string;
+}
+
 export class AuthResponseDto {
   token: string;
   user: {
@@ -28,5 +43,6 @@ export class AuthResponseDto {
     email: string;
     name: string;
     role?: 'admin' | 'trainer' | 'advisor' | 'user';
+    gymId?: string;
   };
 }

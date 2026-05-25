@@ -11,13 +11,15 @@ import {
 import { AttendanceService } from './attendance.service';
 import { CreateAttendanceDto, AttendanceResponseDto } from './dtos/attendance.dto';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
+import { ModuleGuard, RequireModule } from '@/common/guards/module.guard';
 
 @Controller('attendance')
+@UseGuards(JwtAuthGuard, ModuleGuard)
+@RequireModule('checkin')
 export class AttendanceController {
   constructor(private attendanceService: AttendanceService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   async create(
     @Body() createAttendanceDto: CreateAttendanceDto,
@@ -26,7 +28,6 @@ export class AttendanceController {
   }
 
   @Get('client/:clientId')
-  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async findByClientId(
     @Param('clientId') clientId: string,
@@ -35,7 +36,6 @@ export class AttendanceController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async findAll(): Promise<AttendanceResponseDto[]> {
     return this.attendanceService.findAll();

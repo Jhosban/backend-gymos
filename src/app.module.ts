@@ -13,6 +13,10 @@ import { EquipmentModule } from './equipment/equipment.module';
 import { AlertsModule } from './alerts/alerts.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { EmployeesModule } from './employees/employees.module';
+import { GymsModule } from './gyms/gyms.module';
+import { ModulesModule } from './modules/modules.module';
+import { GymModulesModule } from './gym-modules/gym-modules.module';
+import { ModuleGuard } from './common/guards/module.guard';
 
 @Module({
   imports: [
@@ -30,8 +34,11 @@ import { EmployeesModule } from './employees/employees.module';
     AlertsModule,
     DashboardModule,
     EmployeesModule,
+    GymsModule,
+    ModulesModule,
+    GymModulesModule,
   ],
   controllers: [AppController],
-  providers: [AppService, AppConfigService],
+  providers: [AppService, AppConfigService, ModuleGuard],
 })
 export class AppModule {}

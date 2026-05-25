@@ -16,14 +16,90 @@ import * as bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
+  await prisma.gymModule.deleteMany({});
+  await prisma.module.deleteMany({});
   await prisma.maintenanceRecord.deleteMany({});
   await prisma.retentionAlert.deleteMany({});
   await prisma.attendance.deleteMany({});
   await prisma.equipment.deleteMany({});
   await prisma.lead.deleteMany({});
   await prisma.member.deleteMany({});
+  await prisma.employee.deleteMany({});
   await prisma.user.deleteMany({});
+  await prisma.gym.deleteMany({});
 
+  // Create default gym
+  const gym = await prisma.gym.create({
+    data: {
+      name: 'Elite Fitness Center',
+      slug: 'elite-fitness',
+      email: 'admin@elitefitness.com',
+      phone: '+57 300 123 4567',
+      address: 'Calle 123 #45-67, Bogotá',
+    },
+  });
+
+  // Seed modules
+  const modulesData = [
+    {
+      key: 'members',
+      name: 'Gestión de Miembros',
+      description: 'Administra todos los miembros del gimnasio, sus membresías y información de contacto.',
+      price: 29.99,
+      icon: 'users',
+    },
+    {
+      key: 'checkin',
+      name: 'Check-in QR/Huella',
+      description: 'Registro de asistencia mediante código QR o reconocimiento biométrico.',
+      price: 19.99,
+      icon: 'qrcode',
+    },
+    {
+      key: 'pipeline',
+      name: 'Pipeline de Ventas',
+      description: 'Gestiona tu embudo de ventas y seguimiento de prospectos.',
+      price: 39.99,
+      icon: 'trendingup',
+    },
+    {
+      key: 'equipment',
+      name: 'Gestión de Equipamiento',
+      description: 'Controla el inventario y mantenimiento de equipos del gimnasio.',
+      price: 24.99,
+      icon: 'wrench',
+    },
+    {
+      key: 'employees',
+      name: 'Gestión de Empleados',
+      description: 'Administra tu equipo de empleados, horarios y nóminas.',
+      price: 34.99,
+      icon: 'userround',
+    },
+  ];
+
+  const createdModules = await Promise.all(
+    modulesData.map((m) =>
+      prisma.module.create({ data: m })
+    )
+  );
+
+  // Assign all modules to the gym with TRIAL status
+  const trialEndDate = new Date();
+  trialEndDate.setDate(trialEndDate.getDate() + 14);
+
+  for (const mod of createdModules) {
+    await prisma.gymModule.create({
+      data: {
+        gymId: gym.id,
+        moduleId: mod.id,
+        status: 'TRIAL',
+        trialEndsAt: trialEndDate,
+      },
+    });
+  }
+
+  // Create admin user with gym
   const adminPassword = await bcrypt.hash('password123', 10);
   await prisma.user.create({
     data: {
@@ -31,6 +107,7 @@ async function main() {
       name: 'Admin User',
       password: adminPassword,
       role: 'ADMIN',
+      gymId: gym.id,
     },
   });
 
@@ -38,6 +115,7 @@ async function main() {
 
   const carlos = await prisma.member.create({
     data: {
+      gymId: gym.id,
       name: 'Carlos Rodriguez',
       email: 'carlos@email.com',
       phone: '+57 300 123 4567',
@@ -65,6 +143,7 @@ async function main() {
 
   const maria = await prisma.member.create({
     data: {
+      gymId: gym.id,
       name: 'Maria Lopez',
       email: 'maria@email.com',
       phone: '+57 301 234 5678',
@@ -116,6 +195,7 @@ async function main() {
   await prisma.lead.createMany({
     data: [
       {
+        gymId: gym.id,
         name: 'Roberto Gómez',
         email: 'roberto@email.com',
         phone: '+57 305 678 9012',
@@ -136,6 +216,7 @@ async function main() {
         notes: 'Interesado en plan premium. Tour agendado para mañana 5pm.',
       },
       {
+        gymId: gym.id,
         name: 'Patricia Ruiz',
         email: 'patricia@email.com',
         phone: '+57 306 789 0123',
@@ -157,6 +238,7 @@ async function main() {
         notes: 'Referida por miembro actual. Muy interesada.',
       },
       {
+        gymId: gym.id,
         name: 'Javier Torres',
         email: 'javier@email.com',
         phone: '+57 307 890 1234',
@@ -178,6 +260,7 @@ async function main() {
         notes: 'Comparando con otro gym. Negociando precio.',
       },
       {
+        gymId: gym.id,
         name: 'Ana Martínez',
         email: 'ana@email.com',
         phone: '+57 308 901 2345',
@@ -211,6 +294,7 @@ async function main() {
 
   const treadmill = await prisma.equipment.create({
     data: {
+      gymId: gym.id,
       name: 'Cinta de Correr Pro',
       category: 'CARDIO',
       brand: 'Technogym',
