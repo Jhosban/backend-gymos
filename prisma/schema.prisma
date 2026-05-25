@@ -92,6 +92,27 @@ model Lead {
   @@map("leads")
 }
 
+model Employee {
+  id             String   @id @default(cuid())
+  identification String   @unique
+  name           String
+  position       String
+  scheduleDays   String[]
+  startTime      String
+  endTime        String
+  salary         Float
+  photoUrl       String?
+  email          String   @unique
+  phone          String
+  status         String   @default("ACTIVO")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([status])
+  @@index([position])
+  @@map("employees")
+}
+
 model Equipment {
   id                      String              @id @default(cuid())
   name                    String

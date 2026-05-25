@@ -12,6 +12,7 @@ import { LeadsModule } from './leads/leads.module';
 import { EquipmentModule } from './equipment/equipment.module';
 import { AlertsModule } from './alerts/alerts.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { EmployeesModule } from './employees/employees.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     EquipmentModule,
     AlertsModule,
     DashboardModule,
+    EmployeesModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppConfigService],
