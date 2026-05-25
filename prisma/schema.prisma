@@ -162,6 +162,8 @@ model Lead {
   source          String
   status          String   @default("NUEVO")
   assignedAdvisor String
+  productType     String?
+  productDetails Json?
   notes           String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
