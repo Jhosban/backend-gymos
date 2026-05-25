@@ -1,6 +1,12 @@
-import { Injectable, UnauthorizedException, ConflictException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { SignupDto, LoginDto, AuthResponseDto } from './dtos/auth.dto';
+import { SignupDto, LoginDto, ChangePasswordDto, AuthResponseDto } from './dtos/auth.dto';
 import * as bcrypt from 'bcryptjs';
 import { AppConfigService } from '@/config/app.config';
 import { GymDataService } from '@/shared/gym-data.service';
@@ -94,5 +100,34 @@ export class AuthService {
     }
 
     return user;
+  }
+
+  async changePassword(
+    userId: string,
+    dto: ChangePasswordDto,
+  ): Promise<{ message: string }> {
+    const { currentPassword, newPassword } = dto;
+
+    if (newPassword === currentPassword) {
+      throw new BadRequestException(
+        'La nueva contraseña debe ser distinta de la actual',
+      );
+    }
+
+    const user = await this.gymData.findUserById(userId);
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    const isCurrentValid = await bcrypt.compare(currentPassword, user.password);
+
+    if (!isCurrentValid) {
+      throw new BadRequestException('La contraseña actual es incorrecta');
+    }
+
+    await this.gymData.updateUserPassword(userId, newPassword);
+
+    return { message: 'Contraseña actualizada correctamente' };
   }
 }

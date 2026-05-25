@@ -21,6 +21,17 @@ export class LoginDto {
   password: string;
 }
 
+export class ChangePasswordDto {
+  @IsNotEmpty({ message: 'La contraseña actual es requerida' })
+  @IsString()
+  currentPassword: string;
+
+  @IsNotEmpty({ message: 'La nueva contraseña es requerida' })
+  @IsString()
+  @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres' })
+  newPassword: string;
+}
+
 export class AuthResponseDto {
   token: string;
   user: {
