@@ -647,6 +647,13 @@ export class GymDataService {
     };
   }
 
+  async updateUserPassword(userId: string, newPassword: string): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: bcrypt.hashSync(newPassword, 10) },
+    });
+  }
+
   async listUsers(): Promise<User[]> {
     const users = await this.prisma.user.findMany();
     return users.map((user) => ({

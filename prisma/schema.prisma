@@ -146,8 +146,7 @@ model Attendance {
   note       String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-
-  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  member     Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
   @@index([memberId])
   @@index([attendedAt])
@@ -163,8 +162,6 @@ model Lead {
   source          String
   status          String   @default("NUEVO")
   assignedAdvisor String
-  productType     String   @default("FITNESS_PRODUCT")
-  productDetails  Json?
   notes           String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -209,7 +206,7 @@ model Equipment {
 }
 
 model MaintenanceRecord {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   equipmentId   String
   type          String
   description   String
@@ -217,11 +214,10 @@ model MaintenanceRecord {
   cost          Float?
   scheduledDate DateTime
   completedDate DateTime?
-  status        String   @default("PENDIENTE")
+  status        String    @default("PENDIENTE")
   notes         String?
-  createdAt     DateTime @default(now())
-
-  equipment Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  createdAt     DateTime  @default(now())
+  equipment     Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
 
   @@index([equipmentId])
   @@index([status])
@@ -229,7 +225,7 @@ model MaintenanceRecord {
 }
 
 model RetentionAlert {
-  id                 String   @id @default(cuid())
+  id                 String    @id @default(cuid())
   clientId           String
   clientName         String
   type               String
@@ -237,8 +233,8 @@ model RetentionAlert {
   description        String
   daysSinceLastVisit Int?
   recommendedAction  String
-  status             String   @default("PENDIENTE")
-  createdAt          DateTime @default(now())
+  status             String    @default("PENDIENTE")
+  createdAt          DateTime  @default(now())
   resolvedAt         DateTime?
 
   @@index([status])
