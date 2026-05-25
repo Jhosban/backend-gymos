@@ -16,47 +16,44 @@ model User {
   gymId     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  gym Gym? @relation(fields: [gymId], references: [id], onDelete: SetNull)
+  gym       Gym?     @relation(fields: [gymId], references: [id])
 
   @@map("users")
 }
 
 model Gym {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  email     String?
-  phone     String?
-  address   String?
-  logoUrl   String?
-  plan      String   @default("BASIC")
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  users      User[]
-  members    Member[]
-  leads      Lead[]
-  equipment  Equipment[]
+  id         String      @id @default(cuid())
+  name       String
+  slug       String      @unique
+  email      String?
+  phone      String?
+  address    String?
+  logoUrl    String?
+  plan       String      @default("BASIC")
+  isActive   Boolean     @default(true)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
   employees  Employee[]
+  equipment  Equipment[]
   gymModules GymModule[]
+  leads      Lead[]
+  members    Member[]
+  users      User[]
 
   @@map("gyms")
 }
 
 model Module {
-  id          String   @id @default(cuid())
-  key         String   @unique
+  id          String      @id @default(cuid())
+  key         String      @unique
   name        String
   description String?
-  price       Float    @default(0)
+  price       Float       @default(0)
   icon        String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  gymModules GymModule[]
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  gymModules  GymModule[]
 
   @@map("modules")
 }
@@ -69,9 +66,8 @@ model GymModule {
   activatedAt DateTime?
   trialEndsAt DateTime?
   createdAt   DateTime  @default(now())
-
-  gym    Gym    @relation(fields: [gymId], references: [id], onDelete: Cascade)
-  module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  gym         Gym       @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  module      Module    @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 
   @@unique([gymId, moduleId])
   @@map("gym_modules")
@@ -91,8 +87,7 @@ model Employee {
   status     String   @default("active")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-
-  gym Gym @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  gym        Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
 
   @@index([gymId])
   @@map("employees")
@@ -126,9 +121,9 @@ model Member {
   createdAt              DateTime     @default(now())
   updatedAt              DateTime     @updatedAt
   biometricCredentialId  String?      @unique
-
-  gym        Gym         @relation(fields: [gymId], references: [id], onDelete: Cascade)
-  attendance Attendance[]
+  photoUrl               String?
+  attendance             Attendance[]
+  gym                    Gym          @relation(fields: [gymId], references: [id], onDelete: Cascade)
 
   @@index([status])
   @@index([churnRiskLevel])
@@ -163,12 +158,11 @@ model Lead {
   status          String   @default("NUEVO")
   assignedAdvisor String
   productType     String?
-  productDetails Json?
+  productDetails  Json?
   notes           String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-
-  gym Gym @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  gym             Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
 
   @@index([status])
   @@index([source])
@@ -218,9 +212,8 @@ model Equipment {
   notes                   String?
   createdAt               DateTime            @default(now())
   updatedAt               DateTime            @updatedAt
-
-  gym                 Gym                  @relation(fields: [gymId], references: [id], onDelete: Cascade)
-  maintenanceHistory MaintenanceRecord[]
+  gym                     Gym                 @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  maintenanceHistory      MaintenanceRecord[]
 
   @@index([status])
   @@index([category])

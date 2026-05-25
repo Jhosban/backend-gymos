@@ -43,6 +43,9 @@ export class CreateClientDto {
 
   @IsOptional()
   notes?: string;
+
+  @IsOptional()
+  photoUrl?: string;
 }
 
 export class UpdateClientDto {
@@ -88,6 +91,9 @@ export class UpdateClientDto {
 
   @IsOptional()
   notes?: string;
+
+  @IsOptional()
+  photoUrl?: string;
 }
 
 export class ClientResponseDto {
