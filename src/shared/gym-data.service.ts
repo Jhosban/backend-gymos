@@ -139,6 +139,7 @@ export type Member = {
   createdAt: string;
   updatedAt: string;
   hasBiometricCredential?: boolean;
+  photoUrl?: string;
 };
 
 export type Lead = {
@@ -588,6 +589,7 @@ export class GymDataService {
       // Indica si tiene credencial biométrica registrada
       // (no exponemos el id por seguridad)
       hasBiometricCredential: !!(member as any).biometricCredentialId,
+      photoUrl: member.photoUrl ?? undefined,
     };
   }
 
@@ -764,6 +766,7 @@ export class GymDataService {
         acquisitionSource: this.fromAcquisitionSource(input.acquisitionSource),
         assignedTrainer: input.assignedTrainer,
         notes: input.notes,
+        photoUrl: input.photoUrl,
       },
       include: { attendance: true },
     });
@@ -812,6 +815,7 @@ export class GymDataService {
         acquisitionSource: this.fromAcquisitionSource(input.acquisitionSource),
         assignedTrainer: input.assignedTrainer,
         notes: input.notes,
+        photoUrl: input.photoUrl,
       },
       include: { attendance: true },
     });
