@@ -127,7 +127,7 @@ model Member {
   updatedAt              DateTime     @updatedAt
   biometricCredentialId  String?      @unique
 
-  gym        Gym         @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  gym        Gym          @relation(fields: [gymId], references: [id], onDelete: Cascade)
   attendance Attendance[]
 
   @@index([status])
@@ -163,7 +163,7 @@ model Lead {
   status          String   @default("NUEVO")
   assignedAdvisor String
   productType     String?
-  productDetails Json?
+  productDetails  Json?
   notes           String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -177,49 +177,28 @@ model Lead {
   @@map("leads")
 }
 
-model Employee {
-  id             String   @id @default(cuid())
-  identification String   @unique
-  name           String
-  position       String
-  scheduleDays   String[]
-  startTime      String
-  endTime        String
-  salary         Float
-  photoUrl       String?
-  email          String   @unique
-  phone          String
-  status         String   @default("ACTIVO")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  @@index([status])
-  @@index([position])
-  @@map("employees")
-}
-
 model Equipment {
-  id                      String              @id @default(cuid())
+  id                      String   @id @default(cuid())
   gymId                   String
   name                    String
   category                String
   brand                   String?
   model                   String?
-  serialNumber            String?             @unique
+  serialNumber            String?  @unique
   purchaseDate            DateTime
   warrantyEnd             DateTime?
   price                   Float?
-  status                  String              @default("NUEVO")
+  status                  String   @default("NUEVO")
   location                String?
   lastMaintenance         DateTime?
   nextMaintenance         DateTime?
   maintenanceIntervalDays Int
-  totalUsageHours         Int?                @default(0)
+  totalUsageHours         Int?     @default(0)
   notes                   String?
-  createdAt               DateTime            @default(now())
-  updatedAt               DateTime            @updatedAt
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
 
-  gym                 Gym                  @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  gym                Gym                 @relation(fields: [gymId], references: [id], onDelete: Cascade)
   maintenanceHistory MaintenanceRecord[]
 
   @@index([status])
