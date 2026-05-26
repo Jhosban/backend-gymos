@@ -44,16 +44,25 @@ type NormalizedEmployeeInput = {
 export class EmployeesService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(): Promise<EmployeeResponse[]> {
+  async findAll(gymId?: string): Promise<EmployeeResponse[]> {
+    const where: Prisma.EmployeeWhereInput = {};
+    if (gymId) {
+      where.gymId = gymId;
+    }
     const employees = await this.prisma.employee.findMany({
+      where,
       orderBy: { createdAt: 'desc' },
     });
 
     return employees.map((employee) => this.toResponse(employee));
   }
 
-  async findOne(id: string): Promise<EmployeeResponse> {
-    const employee = await this.prisma.employee.findUnique({ where: { id } });
+  async findOne(id: string, gymId?: string): Promise<EmployeeResponse> {
+    const where: Prisma.EmployeeWhereInput = { id };
+    if (gymId) {
+      where.gymId = gymId;
+    }
+    const employee = await this.prisma.employee.findFirst({ where });
 
     if (!employee) {
       throw new NotFoundException(`Employee with ID ${id} not found`);
@@ -62,16 +71,16 @@ export class EmployeesService {
     return this.toResponse(employee);
   }
 
-  async create(dto: CreateEmployeeDto): Promise<EmployeeResponse> {
+  async create(dto: CreateEmployeeDto, gymId?: string): Promise<EmployeeResponse> {
     const data = this.normalizeInput(dto, true) as Prisma.EmployeeCreateInput;
-    const gymId = await getDefaultGymId(this.prisma);
+    const resolvedGymId = gymId ?? (await getDefaultGymId(this.prisma));
 
     try {
       const { updatedAt, createdAt, ...rest } = data;
       const employee = await this.prisma.employee.create({ 
         data: { 
           ...rest, 
-          gym: { connect: { id: gymId } }
+          gym: { connect: { id: resolvedGymId } }
         } 
       });
       return this.toResponse(employee);
@@ -81,8 +90,8 @@ export class EmployeesService {
     }
   }
 
-  async update(id: string, dto: UpdateEmployeeDto): Promise<EmployeeResponse> {
-    await this.ensureExists(id);
+  async update(id: string, dto: UpdateEmployeeDto, gymId?: string): Promise<EmployeeResponse> {
+    await this.ensureExists(id, gymId);
     const data = this.normalizeInput(dto, false) as Prisma.EmployeeUpdateInput;
 
     try {
@@ -98,29 +107,23 @@ export class EmployeesService {
     }
   }
 
-  async delete(id: string): Promise<{ message: string }> {
-    await this.ensureExists(id);
+  async delete(id: string, gymId?: string): Promise<{ message: string }> {
+    await this.ensureExists(id, gymId);
     await this.prisma.employee.delete({ where: { id } });
 
     return { message: 'Empleado eliminado correctamente' };
   }
 
-  private async ensureExists(id: string) {
-    const employee = await this.prisma.employee.findUnique({ where: { id } });
+  private async ensureExists(id: string, gymId?: string) {
+    const where: Prisma.EmployeeWhereInput = { id };
+    if (gymId) {
+      where.gymId = gymId;
+    }
+    const employee = await this.prisma.employee.findFirst({ where });
 
     if (!employee) {
       throw new NotFoundException(`Employee with ID ${id} not found`);
     }
-  }
-
-  private async getDefaultGymId(): Promise<string> {
-    const gym = await this.prisma.gym.findFirst();
-
-    if (!gym) {
-      throw new ConflictException('No gym found to assign employee');
-    }
-
-    return gym.id;
   }
 
   private normalizeInput(dto: CreateEmployeeDto | UpdateEmployeeDto, requireRequiredFields: boolean): NormalizedEmployeeInput {

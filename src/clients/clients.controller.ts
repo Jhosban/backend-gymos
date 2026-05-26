@@ -16,6 +16,7 @@ import { ClientsService } from './clients.service';
 import { CreateClientDto, UpdateClientDto, ClientResponseDto } from './dtos/client.dto';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { ModuleGuard, RequireModule } from '@/common/guards/module.guard';
+import { CurrentGymId } from '@/common/decorators/current-user.decorator';
 
 @Controller('members')
 @UseGuards(JwtAuthGuard, ModuleGuard)
@@ -25,28 +26,28 @@ export class ClientsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createClientDto: CreateClientDto): Promise<ClientResponseDto> {
-    const data = await this.clientsService.create(createClientDto);
+  async create(@Body() createClientDto: CreateClientDto, @CurrentGymId() gymId: string): Promise<ClientResponseDto> {
+    const data = await this.clientsService.create(createClientDto, gymId);
     return { success: true, data } as any;
   }
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  async findAll(@Query() query: { page?: number; limit?: number; search?: string; status?: string; riskLevel?: string }) {
-    const data = await this.clientsService.findAll(query);
+  async findAll(@Query() query: { page?: number; limit?: number; search?: string; status?: string; riskLevel?: string }, @CurrentGymId() gymId: string) {
+    const data = await this.clientsService.findAll(query, gymId);
     return { success: true, data };
   }
 
   @Get('export/csv')
   @Header('Content-Type', 'text/csv')
-  async exportCsv() {
-    return this.clientsService.exportCsv();
+  async exportCsv(@CurrentGymId() gymId: string) {
+    return this.clientsService.exportCsv(gymId);
   }
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  async findOne(@Param('id') id: string): Promise<ClientResponseDto> {
-    const data = await this.clientsService.findOne(id);
+  async findOne(@Param('id') id: string, @CurrentGymId() gymId: string): Promise<ClientResponseDto> {
+    const data = await this.clientsService.findOne(id, gymId);
     return { success: true, data } as any;
   }
 
@@ -55,15 +56,16 @@ export class ClientsController {
   async update(
     @Param('id') id: string,
     @Body() updateClientDto: UpdateClientDto,
+    @CurrentGymId() gymId: string,
   ): Promise<ClientResponseDto> {
-    const data = await this.clientsService.update(id, updateClientDto);
+    const data = await this.clientsService.update(id, updateClientDto, gymId);
     return { success: true, data } as any;
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  async delete(@Param('id') id: string): Promise<{ message: string }> {
-    const data = await this.clientsService.delete(id);
+  async delete(@Param('id') id: string, @CurrentGymId() gymId: string): Promise<{ message: string }> {
+    const data = await this.clientsService.delete(id, gymId);
     return { success: true, data } as any;
   }
 
@@ -72,8 +74,9 @@ export class ClientsController {
   async recordCheckIn(
     @Param('id') id: string,
     @Body() body: { duration?: number; activities?: string[]; note?: string; attendedAt?: string },
+    @CurrentGymId() gymId: string,
   ) {
-    const data = await this.clientsService.recordCheckIn(id, body);
+    const data = await this.clientsService.recordCheckIn(id, body, gymId);
     return { success: true, data } as any;
   }
 }

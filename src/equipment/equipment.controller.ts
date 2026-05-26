@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post
 import { GymDataService } from '@/shared/gym-data.service';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { ModuleGuard, RequireModule } from '@/common/guards/module.guard';
+import { CurrentGymId } from '@/common/decorators/current-user.decorator';
 
 @Controller('equipment')
 @UseGuards(JwtAuthGuard, ModuleGuard)
@@ -10,34 +11,34 @@ export class EquipmentController {
   constructor(private readonly gymData: GymDataService) {}
 
   @Get()
-  async findAll(@Query() query: { page?: number; limit?: number; search?: string; category?: string; status?: string }) {
-    return { success: true, data: await this.gymData.listEquipment(query) };
+  async findAll(@Query() query: { page?: number; limit?: number; search?: string; category?: string; status?: string; gymId?: string }, @CurrentGymId() gymId: string) {
+    return { success: true, data: await this.gymData.listEquipment(query, gymId) };
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    const equipment = await this.gymData.getEquipment(id);
+  async findOne(@Param('id') id: string, @CurrentGymId() gymId: string) {
+    const equipment = await this.gymData.getEquipment(id, gymId);
     if (!equipment) throw new NotFoundException(`Equipment with ID ${id} not found`);
     return { success: true, data: equipment };
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() body: any) {
-    return { success: true, data: await this.gymData.createEquipment(body) };
+  async create(@Body() body: any, @CurrentGymId() gymId: string) {
+    return { success: true, data: await this.gymData.createEquipment(body, gymId) };
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() body: any) {
-    const equipment = await this.gymData.updateEquipment(id, body);
+  async update(@Param('id') id: string, @Body() body: any, @CurrentGymId() gymId: string) {
+    const equipment = await this.gymData.updateEquipment(id, body, gymId);
     if (!equipment) throw new NotFoundException(`Equipment with ID ${id} not found`);
     return { success: true, data: equipment };
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  async delete(@Param('id') id: string) {
-    const deleted = await this.gymData.deleteEquipment(id);
+  async delete(@Param('id') id: string, @CurrentGymId() gymId: string) {
+    const deleted = await this.gymData.deleteEquipment(id, gymId);
     if (!deleted) throw new NotFoundException(`Equipment with ID ${id} not found`);
     return { success: true, message: 'Equipment eliminado correctamente' };
   }

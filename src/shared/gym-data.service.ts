@@ -670,9 +670,11 @@ export class GymDataService {
   }
 
   // Members
-  async listMembers(filters: MemberListFilters = {}): Promise<{ members: Member[]; pagination: PaginationMeta }> {
+  async listMembers(filters: MemberListFilters = {}, gymId?: string): Promise<{ members: Member[]; pagination: PaginationMeta }> {
     const { skip, take, page, limit } = this.paginate(filters.page, filters.limit);
-    const where: Prisma.MemberWhereInput = {};
+    const where: Prisma.MemberWhereInput = {
+      ...(gymId && { gymId }),
+    };
 
     if (filters.search) {
       where.OR = [
@@ -720,12 +722,18 @@ export class GymDataService {
     };
   }
 
-  async getMember(id: string): Promise<Member | undefined> {
-    const member = await this.prisma.member.findUnique({ where: { id }, include: { attendance: true } });
+  async getMember(id: string, gymId?: string): Promise<Member | undefined> {
+    const member = await this.prisma.member.findFirst({
+      where: {
+        id,
+        ...(gymId && { gymId }),
+      },
+      include: { attendance: true },
+    });
     return member ? this.toMemberDTO(member) : undefined;
   }
 
-  async createMember(input: CreateMemberInput): Promise<Member> {
+  async createMember(input: CreateMemberInput, gymId?: string): Promise<Member> {
     const now = new Date();
     const provisional: Partial<Member> = {
       ...input,
@@ -738,12 +746,12 @@ export class GymDataService {
     const status = this.calculateStatus(provisional.lastCheckIn);
     const churn = this.calculateChurnRisk(provisional);
 
-    const gymId = await getDefaultGymId(this.prisma);
+    const resolvedGymId = gymId ?? (await getDefaultGymId(this.prisma));
 
     const member = await this.prisma.member.create({
       data: {
         ...(input.id ? { id: input.id } : {}),
-        gymId,
+        gymId: resolvedGymId,
         name: input.name,
         email: input.email,
         phone: input.phone,
@@ -774,8 +782,14 @@ export class GymDataService {
     return this.toMemberDTO(member);
   }
 
-  async updateMember(id: string, input: UpdateMemberInput): Promise<Member | undefined> {
-    const existing = await this.prisma.member.findUnique({ where: { id }, include: { attendance: true } });
+  async updateMember(id: string, input: UpdateMemberInput, gymId?: string): Promise<Member | undefined> {
+    const existing = await this.prisma.member.findFirst({
+      where: {
+        id,
+        ...(gymId && { gymId }),
+      },
+      include: { attendance: true },
+    });
     if (!existing) return undefined;
 
     const mergedForCalc: Partial<Member> = {
@@ -842,14 +856,27 @@ export class GymDataService {
     return m?.biometricCredentialId ?? null;
   }
 
-  async deleteMember(id: string): Promise<boolean> {
+  async deleteMember(id: string, gymId?: string): Promise<boolean> {
+    const member = await this.prisma.member.findFirst({
+      where: {
+        id,
+        ...(gymId && { gymId }),
+      },
+    });
+    if (!member) return false;
     const result = await this.prisma.member.deleteMany({ where: { id } });
     await this.prisma.retentionAlert.deleteMany({ where: { clientId: id } });
     return result.count > 0;
   }
 
-  async recordCheckIn(id: string, input: CheckInInput = {}): Promise<AttendanceRecord | undefined> {
-    const member = await this.prisma.member.findUnique({ where: { id }, include: { attendance: true } });
+  async recordCheckIn(id: string, input: CheckInInput = {}, gymId?: string): Promise<AttendanceRecord | undefined> {
+    const member = await this.prisma.member.findFirst({
+      where: {
+        id,
+        ...(gymId && { gymId }),
+      },
+      include: { attendance: true },
+    });
     if (!member) return undefined;
 
     const attendedAt = input.attendedAt ? new Date(input.attendedAt) : new Date();
@@ -903,8 +930,13 @@ export class GymDataService {
     };
   }
 
-  async exportMembersCsv(): Promise<string> {
-    const members = await this.prisma.member.findMany({ orderBy: { createdAt: 'desc' } });
+  async exportMembersCsv(gymId?: string): Promise<string> {
+    const members = await this.prisma.member.findMany({
+      where: {
+        ...(gymId && { gymId }),
+      },
+      orderBy: { createdAt: 'desc' },
+    });
     const headers = ['Nombre', 'Email', 'Teléfono', 'Membresía', 'Estado', 'Riesgo', 'Último Check-in'];
     const rows = members.map((member) => [
       member.name,
@@ -920,9 +952,11 @@ export class GymDataService {
   }
 
   // Leads
-  async listLeads(filters: LeadListFilters = {}): Promise<{ leads: Lead[]; pagination: PaginationMeta }> {
+  async listLeads(filters: LeadListFilters = {}, gymId?: string): Promise<{ leads: Lead[]; pagination: PaginationMeta }> {
     const { skip, take, page, limit } = this.paginate(filters.page, filters.limit);
-    const where: Prisma.LeadWhereInput = {};
+    const where: Prisma.LeadWhereInput = {
+      ...(gymId && { gymId }),
+    };
 
     if (filters.search) {
       where.OR = [
@@ -1008,14 +1042,16 @@ export class GymDataService {
     };
   }
 
-  async createLead(input: CreateLeadInput): Promise<Lead> {
+  async createLead(input: CreateLeadInput, gymId?: string): Promise<Lead> {
     const source = input.source === 'calle' ? 'walk_in' : input.source;
 
     // Check for duplicates: same email and productType (case-insensitive)
+    const resolvedGymId = gymId ?? (await getDefaultGymId(this.prisma));
     const existing = await this.prisma.lead.findFirst({
       where: {
         email: { equals: input.email, mode: 'insensitive' },
         productType: this.fromProductType(input.productType) ?? 'FITNESS_PRODUCT',
+        gymId: resolvedGymId,
       },
     });
 
@@ -1023,12 +1059,10 @@ export class GymDataService {
       throw new Error(`Lead duplicado: Ya existe un lead con email "${input.email}" del tipo "${input.productType}"`);
     }
 
-    const gymId = await getDefaultGymId(this.prisma);
-
     const lead = await this.prisma.lead.create({
       data: {
         ...(input.id ? { id: input.id } : {}),
-        gymId,
+        gymId: resolvedGymId,
         name: input.name,
         email: input.email,
         phone: input.phone,
@@ -1102,9 +1136,11 @@ export class GymDataService {
   }
 
   // Equipment
-  async listEquipment(filters: EquipmentListFilters = {}): Promise<{ equipment: Equipment[]; pagination: PaginationMeta }> {
+  async listEquipment(filters: EquipmentListFilters = {}, gymId?: string): Promise<{ equipment: Equipment[]; pagination: PaginationMeta }> {
     const { skip, take, page, limit } = this.paginate(filters.page, filters.limit);
-    const where: Prisma.EquipmentWhereInput = {};
+    const where: Prisma.EquipmentWhereInput = {
+      ...(gymId && { gymId }),
+    };
 
     if (filters.search) {
       where.OR = [
@@ -1177,17 +1213,17 @@ export class GymDataService {
     };
   }
 
-  async getEquipment(id: string): Promise<Equipment | undefined> {
-    return this.getEquipmentById(id);
+  async getEquipment(id: string, gymId?: string): Promise<Equipment | undefined> {
+    return this.getEquipmentById(id, gymId);
   }
 
-  async createEquipment(input: CreateEquipmentInput): Promise<Equipment> {
-    const gymId = await getDefaultGymId(this.prisma);
+  async createEquipment(input: CreateEquipmentInput, gymId?: string): Promise<Equipment> {
+    const resolvedGymId = gymId ?? (await getDefaultGymId(this.prisma));
 
     const item = await this.prisma.equipment.create({
       data: {
         ...(input.id ? { id: input.id } : {}),
-        gymId,
+        gymId: resolvedGymId,
         name: input.name,
         category: this.fromEquipmentCategory(input.category) ?? 'CARDIO',
         brand: input.brand,
@@ -1230,8 +1266,8 @@ export class GymDataService {
     };
   }
 
-  async updateEquipment(id: string, input: UpdateEquipmentInput): Promise<Equipment | undefined> {
-    const exists = await this.prisma.equipment.findUnique({ where: { id } });
+  async updateEquipment(id: string, input: UpdateEquipmentInput, gymId?: string): Promise<Equipment | undefined> {
+    const exists = await this.prisma.equipment.findFirst({ where: { id, ...(gymId && { gymId }) } });
     if (!exists) return undefined;
 
     await this.prisma.equipment.update({
@@ -1258,9 +1294,9 @@ export class GymDataService {
     return this.getEquipmentById(id);
   }
 
-  private async getEquipmentById(id: string): Promise<Equipment | undefined> {
-    const item = await this.prisma.equipment.findUnique({
-      where: { id },
+  private async getEquipmentById(id: string, gymId?: string): Promise<Equipment | undefined> {
+    const item = await this.prisma.equipment.findFirst({
+      where: { id, ...(gymId && { gymId }) },
       include: { maintenanceHistory: { orderBy: { createdAt: 'desc' } } },
     });
     if (!item) return undefined;
@@ -1300,8 +1336,8 @@ export class GymDataService {
     };
   }
 
-  async deleteEquipment(id: string): Promise<boolean> {
-    const result = await this.prisma.equipment.deleteMany({ where: { id } });
+  async deleteEquipment(id: string, gymId?: string): Promise<boolean> {
+    const result = await this.prisma.equipment.deleteMany({ where: { id, ...(gymId && { gymId }) } });
     return result.count > 0;
   }
 

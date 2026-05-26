@@ -5,6 +5,7 @@ import { ExcelService } from '@/excel/excel.service';
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { ModuleGuard, RequireModule } from '@/common/guards/module.guard';
 import { Response as ExpressResponse } from 'express';
+import { CurrentGymId } from '@/common/decorators/current-user.decorator';
 
 @Controller('leads')
 @UseGuards(JwtAuthGuard, ModuleGuard)
@@ -16,8 +17,8 @@ export class LeadsController {
   ) {}
 
   @Get()
-  async findAll(@Query() query: { page?: number; limit?: number; search?: string; status?: string }) {
-    return { success: true, data: await this.gymData.listLeads(query) };
+  async findAll(@Query() query: { page?: number; limit?: number; search?: string; status?: string; gymId?: string }, @CurrentGymId() gymId: string) {
+    return { success: true, data: await this.gymData.listLeads(query, gymId) };
   }
 
   @Get('export/template')
@@ -48,8 +49,8 @@ export class LeadsController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() body: any) {
-    return { success: true, data: await this.gymData.createLead(body) };
+  async create(@Body() body: any, @CurrentGymId() gymId: string) {
+    return { success: true, data: await this.gymData.createLead(body, gymId) };
   }
 
   @Post('import')
