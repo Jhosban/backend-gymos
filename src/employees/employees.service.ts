@@ -35,8 +35,8 @@ type NormalizedEmployeeInput = {
   schedule?: string;
   salary?: number;
   photoUrl?: string | null;
-  email?: string;
-  phone?: string;
+  email?: string | null;
+  phone?: string | null;
   status?: string;
 };
 
@@ -113,6 +113,16 @@ export class EmployeesService {
     }
   }
 
+  private async getDefaultGymId(): Promise<string> {
+    const gym = await this.prisma.gym.findFirst();
+
+    if (!gym) {
+      throw new ConflictException('No gym found to assign employee');
+    }
+
+    return gym.id;
+  }
+
   private normalizeInput(dto: CreateEmployeeDto | UpdateEmployeeDto, requireRequiredFields: boolean): NormalizedEmployeeInput {
     const employeeId = dto.employeeId ?? dto.identification;
     const fullName = dto.fullName ?? dto.name;
@@ -147,11 +157,11 @@ export class EmployeesService {
   }
 
   private toDatabaseStatus(status: string): string {
-    return status.toLowerCase() === 'active' || status.toUpperCase() === 'ACTIVO' ? 'ACTIVO' : 'INACTIVO';
+    return status.toLowerCase() === 'active' || status.toUpperCase() === 'ACTIVO' ? 'active' : 'inactive';
   }
 
   private toFrontendStatus(status: string): 'active' | 'inactive' {
-    return status === 'ACTIVO' ? 'active' : 'inactive';
+    return status.toLowerCase() === 'active' ? 'active' : 'inactive';
   }
 
   private toResponse(employee: Prisma.EmployeeGetPayload<Record<string, never>>): EmployeeResponse {
