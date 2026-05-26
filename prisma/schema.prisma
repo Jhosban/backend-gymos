@@ -73,26 +73,6 @@ model GymModule {
   @@map("gym_modules")
 }
 
-model Employee {
-  id         String   @id @default(cuid())
-  gymId      String
-  employeeId String
-  fullName   String
-  role       String
-  schedule   String?
-  salary     Float?
-  photoUrl   String?
-  email      String?
-  phone      String?
-  status     String   @default("active")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  gym        Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
-
-  @@index([gymId])
-  @@map("employees")
-}
-
 model Member {
   id                     String       @id @default(cuid())
   gymId                  String
@@ -172,23 +152,22 @@ model Lead {
 }
 
 model Employee {
-  id             String   @id @default(cuid())
-  identification String   @unique
-  name           String
-  position       String
-  scheduleDays   String[]
-  startTime      String
-  endTime        String
-  salary         Float
-  photoUrl       String?
-  email          String   @unique
-  phone          String
-  status         String   @default("ACTIVO")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id         String   @id @default(cuid())
+  gymId      String
+  salary     Float?
+  photoUrl   String?
+  email      String?
+  phone      String?
+  status     String   @default("active")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  employeeId String
+  fullName   String
+  role       String
+  schedule   String?
+  gym        Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
 
-  @@index([status])
-  @@index([position])
+  @@index([gymId])
   @@map("employees")
 }
 

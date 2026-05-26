@@ -3,6 +3,16 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { CreateEmployeeDto, UpdateEmployeeDto } from './dtos/employee.dto';
 
+let cachedGymId: string | null = null;
+
+async function getDefaultGymId(prisma: PrismaService): Promise<string> {
+  if (cachedGymId) return cachedGymId;
+  const gym = await prisma.gym.findFirst();
+  if (!gym) throw new Error('No gym found');
+  cachedGymId = gym.id;
+  return gym.id;
+}
+
 type EmployeeResponse = {
   id: string;
   employeeId: string;
@@ -19,12 +29,10 @@ type EmployeeResponse = {
 };
 
 type NormalizedEmployeeInput = {
-  identification?: string;
-  name?: string;
-  position?: string;
-  scheduleDays?: string[];
-  startTime?: string;
-  endTime?: string;
+  employeeId?: string;
+  fullName?: string;
+  role?: string;
+  schedule?: string;
   salary?: number;
   photoUrl?: string | null;
   email?: string;
@@ -56,9 +64,16 @@ export class EmployeesService {
 
   async create(dto: CreateEmployeeDto): Promise<EmployeeResponse> {
     const data = this.normalizeInput(dto, true) as Prisma.EmployeeCreateInput;
+    const gymId = await getDefaultGymId(this.prisma);
 
     try {
-      const employee = await this.prisma.employee.create({ data });
+      const { updatedAt, createdAt, ...rest } = data;
+      const employee = await this.prisma.employee.create({ 
+        data: { 
+          ...rest, 
+          gym: { connect: { id: gymId } }
+        } 
+      });
       return this.toResponse(employee);
     } catch (error) {
       this.handlePrismaError(error);
@@ -71,9 +86,10 @@ export class EmployeesService {
     const data = this.normalizeInput(dto, false) as Prisma.EmployeeUpdateInput;
 
     try {
+      const { updatedAt, createdAt, ...rest } = data;
       const employee = await this.prisma.employee.update({
         where: { id },
-        data,
+        data: rest,
       });
       return this.toResponse(employee);
     } catch (error) {
@@ -98,21 +114,16 @@ export class EmployeesService {
   }
 
   private normalizeInput(dto: CreateEmployeeDto | UpdateEmployeeDto, requireRequiredFields: boolean): NormalizedEmployeeInput {
-    const schedule = this.resolveSchedule(dto);
-    const identification = dto.identification ?? dto.employeeId;
-    const name = dto.name ?? dto.fullName;
-    const position = dto.position ?? dto.role;
+    const employeeId = dto.employeeId ?? dto.identification;
+    const fullName = dto.fullName ?? dto.name;
+    const role = dto.role ?? dto.position;
     const status = dto.status ? this.toDatabaseStatus(dto.status) : requireRequiredFields ? 'ACTIVO' : undefined;
 
     if (requireRequiredFields) {
       const missingFields: string[] = [];
-      if (!identification) missingFields.push('employeeId');
-      if (!name) missingFields.push('fullName');
-      if (!position) missingFields.push('role');
-      if (!schedule.scheduleDays?.length) missingFields.push('schedule');
-      if (!schedule.startTime) missingFields.push('startTime');
-      if (!schedule.endTime) missingFields.push('endTime');
-      if (dto.salary === undefined || dto.salary === null) missingFields.push('salary');
+      if (!employeeId) missingFields.push('employeeId');
+      if (!fullName) missingFields.push('fullName');
+      if (!role) missingFields.push('role');
       if (!dto.email) missingFields.push('email');
       if (!dto.phone) missingFields.push('phone');
 
@@ -122,12 +133,10 @@ export class EmployeesService {
     }
 
     const data: NormalizedEmployeeInput = {};
-    if (identification !== undefined) data.identification = identification;
-    if (name !== undefined) data.name = name;
-    if (position !== undefined) data.position = position;
-    if (schedule.scheduleDays !== undefined) data.scheduleDays = schedule.scheduleDays;
-    if (schedule.startTime !== undefined) data.startTime = schedule.startTime;
-    if (schedule.endTime !== undefined) data.endTime = schedule.endTime;
+    if (employeeId !== undefined) data.employeeId = employeeId;
+    if (fullName !== undefined) data.fullName = fullName;
+    if (role !== undefined) data.role = role;
+    if (dto.schedule !== undefined) data.schedule = dto.schedule;
     if (dto.salary !== undefined) data.salary = dto.salary;
     if (dto.photoUrl !== undefined) data.photoUrl = dto.photoUrl || null;
     if (dto.email !== undefined) data.email = dto.email;
@@ -135,118 +144,6 @@ export class EmployeesService {
     if (status !== undefined) data.status = status;
 
     return data;
-  }
-
-  private resolveSchedule(dto: CreateEmployeeDto | UpdateEmployeeDto): { scheduleDays?: string[]; startTime?: string; endTime?: string } {
-    if (dto.scheduleDays || dto.startTime || dto.endTime) {
-      return {
-        scheduleDays: dto.scheduleDays,
-        startTime: dto.startTime,
-        endTime: dto.endTime,
-      };
-    }
-
-    if (!dto.schedule) {
-      return {};
-    }
-
-    return this.parseSchedule(dto.schedule);
-  }
-
-  private parseSchedule(schedule: string): { scheduleDays: string[]; startTime: string; endTime: string } {
-    const [daysPart = '', timePart = ''] = schedule.split('·').map((part) => part.trim());
-    const scheduleDays = this.parseDays(daysPart);
-    const [startTime, endTime] = this.parseTimes(timePart);
-
-    return { scheduleDays, startTime, endTime };
-  }
-
-  private parseDays(daysPart: string): string[] {
-    const dayMap: Record<string, string> = {
-      lun: 'mon',
-      mar: 'tue',
-      mie: 'wed',
-      mié: 'wed',
-      jue: 'thu',
-      vie: 'fri',
-      sab: 'sat',
-      sáb: 'sat',
-      dom: 'sun',
-    };
-    const order = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-    const days: string[] = [];
-    const tokens = daysPart.split(',').map((token) => token.trim()).filter(Boolean);
-
-    for (const token of tokens) {
-      const rangeMatch = token.match(/([A-Za-zÁÉÍÓÚáéíóúñÑ]{3})\s*[-–]\s*([A-Za-zÁÉÍÓÚáéíóúñÑ]{3})/);
-
-      if (rangeMatch) {
-        const start = dayMap[rangeMatch[1].toLowerCase()];
-        const end = dayMap[rangeMatch[2].toLowerCase()];
-        const startIndex = order.indexOf(start);
-        const endIndex = order.indexOf(end);
-
-        if (startIndex >= 0 && endIndex >= startIndex) {
-          for (let index = startIndex; index <= endIndex; index += 1) {
-            if (!days.includes(order[index])) days.push(order[index]);
-          }
-        }
-
-        continue;
-      }
-
-      const day = dayMap[token.toLowerCase().slice(0, 3)];
-      if (day && !days.includes(day)) days.push(day);
-    }
-
-    return days;
-  }
-
-  private parseTimes(timePart: string): [string, string] {
-    const matches = [...timePart.matchAll(/(\d{1,2}:\d{2})\s*(AM|PM)?/gi)];
-    const startTime = matches[0] ? this.to24Hour(matches[0][1], matches[0][2]) : '08:00';
-    const endTime = matches[1] ? this.to24Hour(matches[1][1], matches[1][2]) : '16:00';
-
-    return [startTime, endTime];
-  }
-
-  private to24Hour(time: string, period?: string): string {
-    const [hours, minutes] = time.split(':');
-    let hour = Number(hours);
-    const normalizedPeriod = period?.toUpperCase();
-
-    if (normalizedPeriod === 'PM' && hour < 12) hour += 12;
-    if (normalizedPeriod === 'AM' && hour === 12) hour = 0;
-
-    return `${String(hour).padStart(2, '0')}:${minutes}`;
-  }
-
-  private formatSchedule(scheduleDays: string[], startTime: string, endTime: string): string {
-    const labels: Record<string, string> = {
-      mon: 'Lun',
-      tue: 'Mar',
-      wed: 'Mié',
-      thu: 'Jue',
-      fri: 'Vie',
-      sat: 'Sáb',
-      sun: 'Dom',
-    };
-    const order = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-    const sortedDays = [...scheduleDays].sort((a, b) => order.indexOf(a) - order.indexOf(b));
-    const days = sortedDays.map((day) => labels[day] ?? day).join(', ');
-
-    return `${days} · ${this.to12Hour(startTime)} - ${this.to12Hour(endTime)}`;
-  }
-
-  private to12Hour(time: string): string {
-    const [hours, minutes] = time.split(':');
-    let hour = Number(hours);
-    const period = hour >= 12 ? 'PM' : 'AM';
-
-    if (hour === 0) hour = 12;
-    if (hour > 12) hour -= 12;
-
-    return `${String(hour).padStart(2, '0')}:${minutes} ${period}`;
   }
 
   private toDatabaseStatus(status: string): string {
@@ -260,14 +157,14 @@ export class EmployeesService {
   private toResponse(employee: Prisma.EmployeeGetPayload<Record<string, never>>): EmployeeResponse {
     return {
       id: employee.id,
-      employeeId: employee.identification,
-      fullName: employee.name,
-      role: employee.position,
-      schedule: this.formatSchedule(employee.scheduleDays, employee.startTime, employee.endTime),
-      salary: employee.salary,
+      employeeId: employee.employeeId,
+      fullName: employee.fullName,
+      role: employee.role,
+      schedule: employee.schedule ?? '',
+      salary: employee.salary ?? 0,
       photoUrl: employee.photoUrl ?? '',
-      email: employee.email,
-      phone: employee.phone,
+      email: employee.email ?? '',
+      phone: employee.phone ?? '',
       status: this.toFrontendStatus(employee.status),
       createdAt: employee.createdAt.toISOString(),
       updatedAt: employee.updatedAt.toISOString(),
