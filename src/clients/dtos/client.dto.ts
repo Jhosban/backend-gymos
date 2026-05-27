@@ -46,6 +46,9 @@ export class CreateClientDto {
 
   @IsOptional()
   photoUrl?: string;
+
+  @IsOptional()
+  birthDate?: string;
 }
 
 export class UpdateClientDto {
@@ -94,6 +97,9 @@ export class UpdateClientDto {
 
   @IsOptional()
   photoUrl?: string;
+
+  @IsOptional()
+  birthDate?: string;
 }
 
 export class ClientResponseDto {
@@ -102,6 +108,7 @@ export class ClientResponseDto {
   email: string;
   phone: string;
   status: Member['status'];
+  birthDate?: string;
   lastCheckIn?: string | null;
   createdAt: string;
   updatedAt: string;
