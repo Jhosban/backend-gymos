@@ -962,25 +962,27 @@ export class GymDataService {
   async setMemberBiometricCredential(
     memberId: string,
     credentialId: string,
+    gymId?: string,
   ): Promise<boolean> {
     try {
-      const updated = await this.prisma.member.update({
-        where: { id: memberId },
+      const updated = await this.prisma.member.updateMany({
+        where: {
+          id: memberId,
+          ...(gymId && { gymId }),
+        },
         data: { biometricCredentialId: credentialId },
-        include: { attendance: true },
       });
-      return !!updated;
+      return updated.count > 0;
     } catch (err) {
       return false;
     }
   }
 
   async listMembersForCheckIn(
-    gymId?: string,
+    gymId: string,
   ): Promise<Array<{ id: string; name: string; hasBiometricCredential: boolean }>> {
-    const resolvedGymId = gymId ?? (await getDefaultGymId(this.prisma));
     const members = await this.prisma.member.findMany({
-      where: { gymId: resolvedGymId },
+      where: { gymId },
       select: {
         id: true,
         name: true,
@@ -998,12 +1000,11 @@ export class GymDataService {
 
   async findMemberByBiometricCredential(
     credentialId: string,
-    gymId?: string,
+    gymId: string,
   ): Promise<Member | undefined> {
-    const resolvedGymId = gymId ?? (await getDefaultGymId(this.prisma));
     const member = await this.prisma.member.findFirst({
       where: {
-        gymId: resolvedGymId,
+        gymId,
         biometricCredentialId: credentialId,
       },
       include: { attendance: true },
@@ -1012,13 +1013,29 @@ export class GymDataService {
     return member ? this.toMemberDTO(member) : undefined;
   }
 
-  async hasMemberBiometricCredential(memberId: string): Promise<boolean> {
-    const m = await this.prisma.member.findUnique({ where: { id: memberId } });
+  async hasMemberBiometricCredential(
+    memberId: string,
+    gymId?: string,
+  ): Promise<boolean> {
+    const m = await this.prisma.member.findFirst({
+      where: {
+        id: memberId,
+        ...(gymId && { gymId }),
+      },
+    });
     return !!m?.biometricCredentialId;
   }
 
-  async getMemberBiometricCredential(memberId: string): Promise<string | null> {
-    const m = await this.prisma.member.findUnique({ where: { id: memberId } });
+  async getMemberBiometricCredential(
+    memberId: string,
+    gymId?: string,
+  ): Promise<string | null> {
+    const m = await this.prisma.member.findFirst({
+      where: {
+        id: memberId,
+        ...(gymId && { gymId }),
+      },
+    });
     return m?.biometricCredentialId ?? null;
   }
 

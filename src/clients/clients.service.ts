@@ -31,8 +31,8 @@ export class ClientsService {
     return this.gymData.listMembers(query, gymId);
   }
 
-  async listCheckInMembers() {
-    return this.gymData.listMembersForCheckIn();
+  async listCheckInMembers(gymId: string) {
+    return this.gymData.listMembersForCheckIn(gymId);
   }
 
   async findOne(id: string, gymId?: string): Promise<ClientResponseDto> {

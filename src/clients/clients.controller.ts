@@ -35,9 +35,11 @@ export class ClientsController {
   }
 
   @Get('checkin-options')
+  @UseGuards(JwtAuthGuard, ModuleGuard)
+  @RequireModule('checkin')
   @HttpCode(HttpStatus.OK)
-  async listCheckInMembers() {
-    const data = await this.clientsService.listCheckInMembers();
+  async listCheckInMembers(@CurrentGymId() gymId: string) {
+    const data = await this.clientsService.listCheckInMembers(gymId);
     return { success: true, data };
   }
 
