@@ -236,3 +236,21 @@ model RetentionAlert {
   @@index([severity])
   @@map("retention_alerts")
 }
+
+model PromotionLog {
+  id             String    @id @default(cuid())
+  memberId       String
+  memberName     String
+  email          String
+  promotionType  String
+  holidayName    String?
+  holidayDate    DateTime?
+  sentAt         DateTime  @default(now())
+  status         String    @default("SENT")
+  errorMessage   String?
+
+  @@unique([memberId, promotionType, holidayDate])
+  @@index([promotionType])
+  @@index([sentAt])
+  @@map("promotion_logs")
+}

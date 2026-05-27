@@ -16,6 +16,7 @@ import { EmployeesModule } from './employees/employees.module';
 import { GymsModule } from './gyms/gyms.module';
 import { ModulesModule } from './modules/modules.module';
 import { GymModulesModule } from './gym-modules/gym-modules.module';
+import { PromotionsModule } from './promotions/promotions.module';
 import { ModuleGuard } from './common/guards/module.guard';
 
 @Module({
@@ -37,6 +38,7 @@ import { ModuleGuard } from './common/guards/module.guard';
     GymsModule,
     ModulesModule,
     GymModulesModule,
+    PromotionsModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppConfigService, ModuleGuard],
