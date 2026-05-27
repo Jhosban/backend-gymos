@@ -17,13 +17,19 @@ export class AttendanceService {
     });
 
     if (!attendance) {
-      throw new NotFoundException(`Client with ID ${createAttendanceDto.clientId} not found`);
+      throw new NotFoundException(
+        `Client with ID ${createAttendanceDto.clientId} not found`,
+      );
     }
 
     return this.mapToResponseDto(createAttendanceDto.clientId, attendance);
   }
 
-  async qrCheckIn(payload: { qrData: string; duration?: number; activities?: string[] }) {
+  async qrCheckIn(payload: {
+    qrData: string;
+    duration?: number;
+    activities?: string[];
+  }) {
     const { qrData, duration, activities } = payload;
     let memberId = qrData;
 
@@ -36,16 +42,27 @@ export class AttendanceService {
       // assume plain id
     }
 
-    const attendance = await this.gymData.recordCheckIn(memberId, { duration, activities });
+    const attendance = await this.gymData.recordCheckIn(memberId, {
+      duration,
+      activities,
+    });
     if (!attendance) throw new NotFoundException(`Member ${memberId} not found`);
     return { success: true, data: attendance };
   }
 
   async registerBiometric(payload: { memberId: string; credentialId: string }) {
     const { memberId, credentialId } = payload;
-    const updated = await this.gymData.setMemberBiometricCredential(memberId, credentialId);
+    const updated = await this.gymData.setMemberBiometricCredential(
+      memberId,
+      credentialId,
+    );
     if (!updated) throw new NotFoundException(`Member ${memberId} not found`);
     return { success: true };
+  }
+
+  async listBiometricMembers() {
+    const members = await this.gymData.listMembersForCheckIn();
+    return { success: true, data: members };
   }
 
   async getMemberBiometricStatus(memberId: string) {
@@ -53,19 +70,51 @@ export class AttendanceService {
     return { hasCredential: !!has };
   }
 
-  async biometricCheckin(payload: { memberId: string; credentialId: string; duration?: number; activities?: string[] }) {
+  async biometricCheckin(payload: {
+    memberId?: string;
+    credentialId: string;
+    duration?: number;
+    activities?: string[];
+  }) {
     const { memberId, credentialId, duration, activities } = payload;
-    const has = await this.gymData.hasMemberBiometricCredential(memberId);
-    if (!has) throw new NotFoundException(`Member ${memberId} has no biometric credential`);
 
-    const stored = await this.gymData.getMemberBiometricCredential(memberId);
+    const resolvedMember = memberId
+      ? await this.gymData.getMember(memberId)
+      : await this.gymData.findMemberByBiometricCredential(credentialId);
+
+    if (!resolvedMember) {
+      throw new NotFoundException(
+        memberId
+          ? `Member ${memberId} not found`
+          : 'No member found with the provided biometric credential',
+      );
+    }
+
+    const stored = await this.gymData.getMemberBiometricCredential(resolvedMember.id);
+    if (!stored) {
+      throw new NotFoundException(
+        `Member ${resolvedMember.id} has no biometric credential`,
+      );
+    }
+
     if (stored !== credentialId) {
       return { success: false, message: 'Credential mismatch' };
     }
 
-    const attendance = await this.gymData.recordCheckIn(memberId, { duration, activities });
-    if (!attendance) throw new NotFoundException(`Member ${memberId} not found`);
-    return { success: true, data: attendance };
+    const attendance = await this.gymData.recordCheckIn(resolvedMember.id, {
+      duration,
+      activities,
+    });
+    if (!attendance)
+      throw new NotFoundException(`Member ${resolvedMember.id} not found`);
+    return {
+      success: true,
+      data: {
+        memberId: resolvedMember.id,
+        memberName: resolvedMember.name,
+        attendance,
+      },
+    };
   }
 
   async findByClientId(clientId: string): Promise<AttendanceResponseDto[]> {
@@ -74,17 +123,29 @@ export class AttendanceService {
       throw new NotFoundException(`Client with ID ${clientId} not found`);
     }
 
-    return client.attendance.map((attendance) => this.mapToResponseDto(clientId, attendance));
+    return client.attendance.map((attendance) =>
+      this.mapToResponseDto(clientId, attendance),
+    );
   }
 
   async findAll(): Promise<AttendanceResponseDto[]> {
     const listed = await this.gymData.listMembers({ page: 1, limit: 100 });
     return listed.members.flatMap((member) =>
-      member.attendance.map((attendance) => this.mapToResponseDto(member.id, attendance)),
+      member.attendance.map((attendance) =>
+        this.mapToResponseDto(member.id, attendance),
+      ),
     );
   }
 
-  private mapToResponseDto(clientId: string, attendance: { date: string; duration?: number; activities?: string[]; note?: string }): AttendanceResponseDto {
+  private mapToResponseDto(
+    clientId: string,
+    attendance: {
+      date: string;
+      duration?: number;
+      activities?: string[];
+      note?: string;
+    },
+  ): AttendanceResponseDto {
     return {
       id: attendance.date,
       clientId,

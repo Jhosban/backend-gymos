@@ -14,12 +14,12 @@ import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard';
 import { ModuleGuard, RequireModule } from '@/common/guards/module.guard';
 
 @Controller('attendance')
-@UseGuards(JwtAuthGuard, ModuleGuard)
-@RequireModule('checkin')
 export class AttendanceController {
   constructor(private attendanceService: AttendanceService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard, ModuleGuard)
+  @RequireModule('checkin')
   @HttpCode(HttpStatus.CREATED)
   async create(
     @Body() createAttendanceDto: CreateAttendanceDto,
@@ -28,6 +28,8 @@ export class AttendanceController {
   }
 
   @Get('client/:clientId')
+  @UseGuards(JwtAuthGuard, ModuleGuard)
+  @RequireModule('checkin')
   @HttpCode(HttpStatus.OK)
   async findByClientId(
     @Param('clientId') clientId: string,
@@ -36,6 +38,8 @@ export class AttendanceController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard, ModuleGuard)
+  @RequireModule('checkin')
   @HttpCode(HttpStatus.OK)
   async findAll(): Promise<AttendanceResponseDto[]> {
     return this.attendanceService.findAll();
@@ -48,12 +52,22 @@ export class AttendanceController {
   }
 
   @Post('biometric/register')
+  @UseGuards(JwtAuthGuard, ModuleGuard)
+  @RequireModule('checkin')
   @HttpCode(HttpStatus.OK)
   async registerBiometric(@Body() body: any) {
     return this.attendanceService.registerBiometric(body);
   }
 
+  @Get('biometric/members')
+  @HttpCode(HttpStatus.OK)
+  async listBiometricMembers() {
+    return this.attendanceService.listBiometricMembers();
+  }
+
   @Get('biometric/member/:memberId')
+  @UseGuards(JwtAuthGuard, ModuleGuard)
+  @RequireModule('checkin')
   @HttpCode(HttpStatus.OK)
   async getMemberBiometricStatus(@Param('memberId') memberId: string) {
     return this.attendanceService.getMemberBiometricStatus(memberId);

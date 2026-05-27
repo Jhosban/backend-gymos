@@ -19,12 +19,35 @@ type MembershipStatus = 'ACTIVO' | 'CONGELADO' | 'VENCIDO' | 'CANCELADO';
 type PreferredSchedule = 'MANANA' | 'TARDE' | 'NOCHE';
 type AcquisitionSource = 'INSTAGRAM' | 'GOOGLE' | 'REFERIDO' | 'CALLE' | 'FACEBOOK';
 type LeadSource = 'INSTAGRAM' | 'GOOGLE' | 'REFERIDO' | 'WALK_IN' | 'FACEBOOK';
-type PrismaLeadStatus = 'NUEVO' | 'CONTACTADO' | 'TOUR_AGENDADO' | 'TOUR_REALIZADO' | 'PROPUESTA' | 'NEGOCIACION' | 'CERRADO_GANADO' | 'CERRADO_PERDIDO';
-type PrismaEquipmentCategory = 'CARDIO' | 'PESAS' | 'MAQUINAS' | 'FUNCIONAL' | 'ACCESORIOS';
-type PrismaEquipmentStatus = 'OPERATIVO' | 'EN_MANTENIMIENTO' | 'FUERA_SERVICIO' | 'NUEVO';
+type PrismaLeadStatus =
+  | 'NUEVO'
+  | 'CONTACTADO'
+  | 'TOUR_AGENDADO'
+  | 'TOUR_REALIZADO'
+  | 'PROPUESTA'
+  | 'NEGOCIACION'
+  | 'CERRADO_GANADO'
+  | 'CERRADO_PERDIDO';
+type PrismaEquipmentCategory =
+  | 'CARDIO'
+  | 'PESAS'
+  | 'MAQUINAS'
+  | 'FUNCIONAL'
+  | 'ACCESORIOS';
+type PrismaEquipmentStatus =
+  | 'OPERATIVO'
+  | 'EN_MANTENIMIENTO'
+  | 'FUERA_SERVICIO'
+  | 'NUEVO';
 type PrismaMaintenanceStatus = 'PENDIENTE' | 'EN_PROGRESO' | 'COMPLETADO';
 type PrismaMaintenanceType = 'PREVENTIVO' | 'CORRECTIVO' | 'INSPECCION';
-type PrismaAlertType = 'AUSENCIA_PROLONGADA' | 'PAGO_FALLIDO' | 'BAJO_ENGAGEMENT' | 'QUEJA_RECIENTE' | 'CUMPLEANOS_PROXIMO' | 'MILESTONE_ALCANZADO';
+type PrismaAlertType =
+  | 'AUSENCIA_PROLONGADA'
+  | 'PAGO_FALLIDO'
+  | 'BAJO_ENGAGEMENT'
+  | 'QUEJA_RECIENTE'
+  | 'CUMPLEANOS_PROXIMO'
+  | 'MILESTONE_ALCANZADO';
 type PrismaAlertSeverity = 'INFORMATIVA' | 'ACCION_REQUERIDA' | 'CRITICA';
 type PrismaAlertStatus = 'PENDIENTE' | 'EN_PROGRESO' | 'RESUELTA';
 type UserRole = 'ADMIN' | 'TRAINER' | 'ADVISOR' | 'USER';
@@ -39,10 +62,35 @@ export type PaginationMeta = {
 export type ClientStatus = 'active' | 'at-risk' | 'inactive';
 export type ChurnRiskLevel = 'bajo' | 'medio' | 'alto' | 'critico';
 export type MembershipType = 'basica' | 'premium' | 'vip' | 'estudiante';
-export type LeadStatus = 'nuevo' | 'contactado' | 'tour_agendado' | 'tour_realizado' | 'propuesta' | 'negociacion' | 'cerrado_ganado' | 'cerrado_perdido';
-export type LeadSourceType = 'instagram' | 'google' | 'referido' | 'walk_in' | 'facebook' | 'calle';
-export type ProductType = 'fitness_product' | 'membership' | 'personal_training' | 'combo';
-export type ServiceType = 'basica' | 'premium' | 'vip' | 'estudiante' | 'individual' | 'grupal' | 'funcional';
+export type LeadStatus =
+  | 'nuevo'
+  | 'contactado'
+  | 'tour_agendado'
+  | 'tour_realizado'
+  | 'propuesta'
+  | 'negociacion'
+  | 'cerrado_ganado'
+  | 'cerrado_perdido';
+export type LeadSourceType =
+  | 'instagram'
+  | 'google'
+  | 'referido'
+  | 'walk_in'
+  | 'facebook'
+  | 'calle';
+export type ProductType =
+  | 'fitness_product'
+  | 'membership'
+  | 'personal_training'
+  | 'combo';
+export type ServiceType =
+  | 'basica'
+  | 'premium'
+  | 'vip'
+  | 'estudiante'
+  | 'individual'
+  | 'grupal'
+  | 'funcional';
 
 // Product-specific details types
 export type MembershipDetails = {
@@ -95,12 +143,31 @@ export type ComboDetails = {
   isRecurring: boolean;
 };
 
-export type ProductDetails = MembershipDetails | PersonalTrainingDetails | FitnessProductDetails | ComboDetails;
-export type EquipmentCategory = 'cardio' | 'pesas' | 'maquinas' | 'funcional' | 'accesorios';
-export type EquipmentStatus = 'operativo' | 'en_mantenimiento' | 'fuera_servicio' | 'nuevo';
+export type ProductDetails =
+  | MembershipDetails
+  | PersonalTrainingDetails
+  | FitnessProductDetails
+  | ComboDetails;
+export type EquipmentCategory =
+  | 'cardio'
+  | 'pesas'
+  | 'maquinas'
+  | 'funcional'
+  | 'accesorios';
+export type EquipmentStatus =
+  | 'operativo'
+  | 'en_mantenimiento'
+  | 'fuera_servicio'
+  | 'nuevo';
 export type MaintenanceType = 'preventivo' | 'correctivo' | 'inspeccion';
 export type MaintenanceStatus = 'pendiente' | 'en_progreso' | 'completado';
-export type AlertType = 'ausencia_prolongada' | 'pago_fallido' | 'bajo_engagement' | 'queja_reciente' | 'cumpleanos_proximo' | 'milestone_alcanzado';
+export type AlertType =
+  | 'ausencia_prolongada'
+  | 'pago_fallido'
+  | 'bajo_engagement'
+  | 'queja_reciente'
+  | 'cumpleanos_proximo'
+  | 'milestone_alcanzado';
 export type AlertSeverity = 'informativa' | 'accion_requerida' | 'critica';
 export type AlertStatus = 'pendiente' | 'en_progreso' | 'resuelta';
 
@@ -273,11 +340,17 @@ export type CreateEquipmentInput = Partial<Equipment> & {
 
 export type UpdateEquipmentInput = Partial<CreateEquipmentInput>;
 
-export type CreateMaintenanceInput = Omit<MaintenanceRecord, 'id' | 'equipmentId' | 'createdAt'> & {
+export type CreateMaintenanceInput = Omit<
+  MaintenanceRecord,
+  'id' | 'equipmentId' | 'createdAt'
+> & {
   scheduledDate: string;
 };
 
-export type CreateAlertInput = Omit<RetentionAlert, 'id' | 'createdAt' | 'resolvedAt'> & {
+export type CreateAlertInput = Omit<
+  RetentionAlert,
+  'id' | 'createdAt' | 'resolvedAt'
+> & {
   createdAt?: string;
   resolvedAt?: string;
 };
@@ -297,7 +370,9 @@ export class GymDataService {
   ) {}
 
   private daysBetween(from: string, to = new Date().toISOString()): number {
-    return Math.floor((new Date(to).getTime() - new Date(from).getTime()) / (1000 * 60 * 60 * 24));
+    return Math.floor(
+      (new Date(to).getTime() - new Date(from).getTime()) / (1000 * 60 * 60 * 24),
+    );
   }
 
   private parseActivities(activities?: string | null): string[] | undefined {
@@ -306,7 +381,10 @@ export class GymDataService {
       const parsed = JSON.parse(activities);
       return Array.isArray(parsed) ? parsed : undefined;
     } catch {
-      return activities.split(',').map((item) => item.trim()).filter(Boolean);
+      return activities
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean);
     }
   }
 
@@ -478,7 +556,9 @@ export class GymDataService {
     return schedule.toUpperCase() as PreferredSchedule;
   }
 
-  private toPreferredSchedule(schedule: string | null): Member['preferredSchedule'] | undefined {
+  private toPreferredSchedule(
+    schedule: string | null,
+  ): Member['preferredSchedule'] | undefined {
     if (!schedule) return undefined;
     return schedule.toLowerCase() as Member['preferredSchedule'];
   }
@@ -502,7 +582,10 @@ export class GymDataService {
     return 'inactive';
   }
 
-  private calculateChurnRisk(member: Partial<Member>): { score: number; level: ChurnRiskLevel } {
+  private calculateChurnRisk(member: Partial<Member>): {
+    score: number;
+    level: ChurnRiskLevel;
+  } {
     let score = 0;
 
     if (member.lastCheckIn) {
@@ -515,14 +598,23 @@ export class GymDataService {
       score += 40;
     }
 
-    const expectedVisits = member.experienceLevel === 'principiante' ? 2 : member.experienceLevel === 'intermedio' ? 3.5 : 4.5;
-    const ratio = expectedVisits > 0 ? (member.averageCheckInsPerWeek ?? 0) / expectedVisits : 0;
+    const expectedVisits =
+      member.experienceLevel === 'principiante'
+        ? 2
+        : member.experienceLevel === 'intermedio'
+          ? 3.5
+          : 4.5;
+    const ratio =
+      expectedVisits > 0 ? (member.averageCheckInsPerWeek ?? 0) / expectedVisits : 0;
     if (ratio < 0.3) score += 30;
     else if (ratio < 0.6) score += 15;
     else if (ratio < 0.8) score += 5;
 
     if (member.membershipEnd) {
-      const daysUntilExpiry = this.daysBetween(new Date().toISOString(), member.membershipEnd);
+      const daysUntilExpiry = this.daysBetween(
+        new Date().toISOString(),
+        member.membershipEnd,
+      );
       if (daysUntilExpiry <= 7) score += 20;
       else if (daysUntilExpiry <= 30) score += 10;
     }
@@ -530,7 +622,14 @@ export class GymDataService {
     if (member.experienceLevel === 'principiante') score += 10;
 
     const capped = Math.min(score, 100);
-    const level: ChurnRiskLevel = capped >= 75 ? 'critico' : capped >= 50 ? 'alto' : capped >= 25 ? 'medio' : 'bajo';
+    const level: ChurnRiskLevel =
+      capped >= 75
+        ? 'critico'
+        : capped >= 50
+          ? 'alto'
+          : capped >= 25
+            ? 'medio'
+            : 'bajo';
     return { score: capped, level };
   }
 
@@ -544,12 +643,15 @@ export class GymDataService {
   private fromProductType(type?: string): string | undefined {
     if (!type) return 'FITNESS_PRODUCT';
     if (type === 'membership' || type === 'MEMBERSHIP') return 'MEMBERSHIP';
-    if (type === 'personal_training' || type === 'PERSONAL_TRAINING') return 'PERSONAL_TRAINING';
+    if (type === 'personal_training' || type === 'PERSONAL_TRAINING')
+      return 'PERSONAL_TRAINING';
     if (type === 'combo' || type === 'COMBO') return 'COMBO';
     return 'FITNESS_PRODUCT';
   }
 
-  private toMemberDTO(member: Prisma.MemberGetPayload<{ include: { attendance: true } }>): Member {
+  private toMemberDTO(
+    member: Prisma.MemberGetPayload<{ include: { attendance: true } }>,
+  ): Member {
     const attendance = member.attendance
       .sort((a, b) => a.attendedAt.getTime() - b.attendedAt.getTime())
       .map((item) => ({
@@ -565,7 +667,10 @@ export class GymDataService {
       email: member.email,
       phone: member.phone,
       birthDate: member.birthDate?.toISOString(),
-      gender: member.gender === 'OTRO' ? 'Otro' : (member.gender as Member['gender']) ?? undefined,
+      gender:
+        member.gender === 'OTRO'
+          ? 'Otro'
+          : ((member.gender as Member['gender']) ?? undefined),
       goal: this.toGoal(member.goal),
       experienceLevel: this.toExperienceLevel(member.experienceLevel),
       membershipType: this.toMembershipType(member.membershipType),
@@ -628,7 +733,12 @@ export class GymDataService {
     };
   }
 
-  async createUser(email: string, name: string, password: string, role: User['role'] = 'admin'): Promise<User> {
+  async createUser(
+    email: string,
+    name: string,
+    password: string,
+    role: User['role'] = 'admin',
+  ): Promise<User> {
     const user = await this.prisma.user.create({
       data: {
         email,
@@ -670,7 +780,10 @@ export class GymDataService {
   }
 
   // Members
-  async listMembers(filters: MemberListFilters = {}, gymId?: string): Promise<{ members: Member[]; pagination: PaginationMeta }> {
+  async listMembers(
+    filters: MemberListFilters = {},
+    gymId?: string,
+  ): Promise<{ members: Member[]; pagination: PaginationMeta }> {
     const { skip, take, page, limit } = this.paginate(filters.page, filters.limit);
     const where: Prisma.MemberWhereInput = {
       ...(gymId && { gymId }),
@@ -737,7 +850,8 @@ export class GymDataService {
     const now = new Date();
     const provisional: Partial<Member> = {
       ...input,
-      experienceLevel: (input.experienceLevel as Member['experienceLevel']) ?? 'principiante',
+      experienceLevel:
+        (input.experienceLevel as Member['experienceLevel']) ?? 'principiante',
       averageCheckInsPerWeek: input.averageCheckInsPerWeek ?? 0,
       membershipEnd: input.membershipEnd,
       lastCheckIn: input.lastCheckIn ?? null,
@@ -758,7 +872,8 @@ export class GymDataService {
         birthDate: input.birthDate ? new Date(input.birthDate) : undefined,
         gender: input.gender === 'Otro' ? 'OTRO' : (input.gender as any),
         goal: this.fromGoal(input.goal) ?? 'SALUD_GENERAL',
-        experienceLevel: this.fromExperienceLevel(input.experienceLevel) ?? 'PRINCIPIANTE',
+        experienceLevel:
+          this.fromExperienceLevel(input.experienceLevel) ?? 'PRINCIPIANTE',
         membershipType: this.fromMembershipType(input.membershipType) ?? 'BASICA',
         joinedAt: input.joinedAt ? new Date(input.joinedAt) : now,
         membershipEnd: input.membershipEnd ? new Date(input.membershipEnd) : undefined,
@@ -782,7 +897,11 @@ export class GymDataService {
     return this.toMemberDTO(member);
   }
 
-  async updateMember(id: string, input: UpdateMemberInput, gymId?: string): Promise<Member | undefined> {
+  async updateMember(
+    id: string,
+    input: UpdateMemberInput,
+    gymId?: string,
+  ): Promise<Member | undefined> {
     const existing = await this.prisma.member.findFirst({
       where: {
         id,
@@ -797,8 +916,11 @@ export class GymDataService {
       ...input,
       lastCheckIn: input.lastCheckIn ?? existing.lastCheckIn?.toISOString() ?? null,
       membershipEnd: input.membershipEnd ?? existing.membershipEnd?.toISOString(),
-      experienceLevel: (input.experienceLevel as Member['experienceLevel']) ?? this.toExperienceLevel(existing.experienceLevel),
-      averageCheckInsPerWeek: input.averageCheckInsPerWeek ?? existing.averageCheckInsPerWeek,
+      experienceLevel:
+        (input.experienceLevel as Member['experienceLevel']) ??
+        this.toExperienceLevel(existing.experienceLevel),
+      averageCheckInsPerWeek:
+        input.averageCheckInsPerWeek ?? existing.averageCheckInsPerWeek,
     };
 
     const status = this.calculateStatus(mergedForCalc.lastCheckIn);
@@ -837,13 +959,57 @@ export class GymDataService {
     return this.toMemberDTO(updated);
   }
 
-  async setMemberBiometricCredential(memberId: string, credentialId: string): Promise<boolean> {
+  async setMemberBiometricCredential(
+    memberId: string,
+    credentialId: string,
+  ): Promise<boolean> {
     try {
-      const updated = await this.prisma.member.update({ where: { id: memberId }, data: { biometricCredentialId: credentialId }, include: { attendance: true } });
+      const updated = await this.prisma.member.update({
+        where: { id: memberId },
+        data: { biometricCredentialId: credentialId },
+        include: { attendance: true },
+      });
       return !!updated;
     } catch (err) {
       return false;
     }
+  }
+
+  async listMembersForCheckIn(
+    gymId?: string,
+  ): Promise<Array<{ id: string; name: string; hasBiometricCredential: boolean }>> {
+    const resolvedGymId = gymId ?? (await getDefaultGymId(this.prisma));
+    const members = await this.prisma.member.findMany({
+      where: { gymId: resolvedGymId },
+      select: {
+        id: true,
+        name: true,
+        biometricCredentialId: true,
+      },
+      orderBy: { name: 'asc' },
+    });
+
+    return members.map((member) => ({
+      id: member.id,
+      name: member.name,
+      hasBiometricCredential: !!member.biometricCredentialId,
+    }));
+  }
+
+  async findMemberByBiometricCredential(
+    credentialId: string,
+    gymId?: string,
+  ): Promise<Member | undefined> {
+    const resolvedGymId = gymId ?? (await getDefaultGymId(this.prisma));
+    const member = await this.prisma.member.findFirst({
+      where: {
+        gymId: resolvedGymId,
+        biometricCredentialId: credentialId,
+      },
+      include: { attendance: true },
+    });
+
+    return member ? this.toMemberDTO(member) : undefined;
   }
 
   async hasMemberBiometricCredential(memberId: string): Promise<boolean> {
@@ -869,7 +1035,11 @@ export class GymDataService {
     return result.count > 0;
   }
 
-  async recordCheckIn(id: string, input: CheckInInput = {}, gymId?: string): Promise<AttendanceRecord | undefined> {
+  async recordCheckIn(
+    id: string,
+    input: CheckInInput = {},
+    gymId?: string,
+  ): Promise<AttendanceRecord | undefined> {
     const member = await this.prisma.member.findFirst({
       where: {
         id,
@@ -901,7 +1071,10 @@ export class GymDataService {
     });
 
     const avg = Math.round((totalLast30 / 4.3) * 10) / 10;
-    const dto = this.toMemberDTO({ ...member, attendance: [...member.attendance, attendance] });
+    const dto = this.toMemberDTO({
+      ...member,
+      attendance: [...member.attendance, attendance],
+    });
     const status = this.calculateStatus(attendedAt.toISOString());
     const churn = this.calculateChurnRisk({
       ...dto,
@@ -937,7 +1110,15 @@ export class GymDataService {
       },
       orderBy: { createdAt: 'desc' },
     });
-    const headers = ['Nombre', 'Email', 'Teléfono', 'Membresía', 'Estado', 'Riesgo', 'Último Check-in'];
+    const headers = [
+      'Nombre',
+      'Email',
+      'Teléfono',
+      'Membresía',
+      'Estado',
+      'Riesgo',
+      'Último Check-in',
+    ];
     const rows = members.map((member) => [
       member.name,
       member.email,
@@ -952,7 +1133,10 @@ export class GymDataService {
   }
 
   // Leads
-  async listLeads(filters: LeadListFilters = {}, gymId?: string): Promise<{ leads: Lead[]; pagination: PaginationMeta }> {
+  async listLeads(
+    filters: LeadListFilters = {},
+    gymId?: string,
+  ): Promise<{ leads: Lead[]; pagination: PaginationMeta }> {
     const { skip, take, page, limit } = this.paginate(filters.page, filters.limit);
     const where: Prisma.LeadWhereInput = {
       ...(gymId && { gymId }),
@@ -985,7 +1169,11 @@ export class GymDataService {
         status: this.toLeadStatus(lead.status),
         assignedAdvisor: lead.assignedAdvisor,
         productType: this.toProductType(lead.productType),
-        productDetails: lead.productDetails ? (typeof lead.productDetails === 'string' ? JSON.parse(lead.productDetails) : lead.productDetails) : undefined,
+        productDetails: lead.productDetails
+          ? typeof lead.productDetails === 'string'
+            ? JSON.parse(lead.productDetails)
+            : lead.productDetails
+          : undefined,
         notes: lead.notes ?? undefined,
         createdAt: lead.createdAt.toISOString(),
         updatedAt: lead.updatedAt.toISOString(),
@@ -1011,14 +1199,21 @@ export class GymDataService {
       status: this.toLeadStatus(lead.status),
       assignedAdvisor: lead.assignedAdvisor,
       productType: this.toProductType(lead.productType),
-      productDetails: lead.productDetails ? (typeof lead.productDetails === 'string' ? JSON.parse(lead.productDetails) : lead.productDetails) : undefined,
+      productDetails: lead.productDetails
+        ? typeof lead.productDetails === 'string'
+          ? JSON.parse(lead.productDetails)
+          : lead.productDetails
+        : undefined,
       notes: lead.notes ?? undefined,
       createdAt: lead.createdAt.toISOString(),
       updatedAt: lead.updatedAt.toISOString(),
     };
   }
 
-  async findLeadByEmailAndProductType(email: string, productType: string): Promise<Lead | undefined> {
+  async findLeadByEmailAndProductType(
+    email: string,
+    productType: string,
+  ): Promise<Lead | undefined> {
     const existing = await this.prisma.lead.findFirst({
       where: {
         email: { equals: email, mode: 'insensitive' },
@@ -1035,7 +1230,11 @@ export class GymDataService {
       status: this.toLeadStatus(existing.status),
       assignedAdvisor: existing.assignedAdvisor,
       productType: this.toProductType(existing.productType),
-      productDetails: existing.productDetails ? (typeof existing.productDetails === 'string' ? JSON.parse(existing.productDetails) : existing.productDetails) : undefined,
+      productDetails: existing.productDetails
+        ? typeof existing.productDetails === 'string'
+          ? JSON.parse(existing.productDetails)
+          : existing.productDetails
+        : undefined,
       notes: existing.notes ?? undefined,
       createdAt: existing.createdAt.toISOString(),
       updatedAt: existing.updatedAt.toISOString(),
@@ -1056,7 +1255,9 @@ export class GymDataService {
     });
 
     if (existing) {
-      throw new Error(`Lead duplicado: Ya existe un lead con email "${input.email}" del tipo "${input.productType}"`);
+      throw new Error(
+        `Lead duplicado: Ya existe un lead con email "${input.email}" del tipo "${input.productType}"`,
+      );
     }
 
     const lead = await this.prisma.lead.create({
@@ -1084,7 +1285,11 @@ export class GymDataService {
       status: this.toLeadStatus(lead.status),
       assignedAdvisor: lead.assignedAdvisor,
       productType: this.toProductType(lead.productType),
-      productDetails: lead.productDetails ? (typeof lead.productDetails === 'string' ? JSON.parse(lead.productDetails) : lead.productDetails) : undefined,
+      productDetails: lead.productDetails
+        ? typeof lead.productDetails === 'string'
+          ? JSON.parse(lead.productDetails)
+          : lead.productDetails
+        : undefined,
       notes: lead.notes ?? undefined,
       createdAt: lead.createdAt.toISOString(),
       updatedAt: lead.updatedAt.toISOString(),
@@ -1105,7 +1310,9 @@ export class GymDataService {
         status: this.fromLeadStatus(input.status),
         assignedAdvisor: input.assignedAdvisor,
         notes: input.notes,
-        productType: input.productType ? this.fromProductType(input.productType) : undefined,
+        productType: input.productType
+          ? this.fromProductType(input.productType)
+          : undefined,
         productDetails: input.productDetails ?? undefined,
       },
     });
@@ -1119,7 +1326,11 @@ export class GymDataService {
       status: this.toLeadStatus(lead.status),
       assignedAdvisor: lead.assignedAdvisor,
       productType: this.toProductType(lead.productType),
-      productDetails: lead.productDetails ? (typeof lead.productDetails === 'string' ? JSON.parse(lead.productDetails) : lead.productDetails) : undefined,
+      productDetails: lead.productDetails
+        ? typeof lead.productDetails === 'string'
+          ? JSON.parse(lead.productDetails)
+          : lead.productDetails
+        : undefined,
       notes: lead.notes ?? undefined,
       createdAt: lead.createdAt.toISOString(),
       updatedAt: lead.updatedAt.toISOString(),
@@ -1136,7 +1347,10 @@ export class GymDataService {
   }
 
   // Equipment
-  async listEquipment(filters: EquipmentListFilters = {}, gymId?: string): Promise<{ equipment: Equipment[]; pagination: PaginationMeta }> {
+  async listEquipment(
+    filters: EquipmentListFilters = {},
+    gymId?: string,
+  ): Promise<{ equipment: Equipment[]; pagination: PaginationMeta }> {
     const { skip, take, page, limit } = this.paginate(filters.page, filters.limit);
     const where: Prisma.EquipmentWhereInput = {
       ...(gymId && { gymId }),
@@ -1217,7 +1431,10 @@ export class GymDataService {
     return this.getEquipmentById(id, gymId);
   }
 
-  async createEquipment(input: CreateEquipmentInput, gymId?: string): Promise<Equipment> {
+  async createEquipment(
+    input: CreateEquipmentInput,
+    gymId?: string,
+  ): Promise<Equipment> {
     const resolvedGymId = gymId ?? (await getDefaultGymId(this.prisma));
 
     const item = await this.prisma.equipment.create({
@@ -1234,8 +1451,12 @@ export class GymDataService {
         price: input.price,
         status: this.fromEquipmentStatus(input.status) ?? 'NUEVO',
         location: input.location,
-        lastMaintenance: input.lastMaintenance ? new Date(input.lastMaintenance) : undefined,
-        nextMaintenance: input.nextMaintenance ? new Date(input.nextMaintenance) : undefined,
+        lastMaintenance: input.lastMaintenance
+          ? new Date(input.lastMaintenance)
+          : undefined,
+        nextMaintenance: input.nextMaintenance
+          ? new Date(input.nextMaintenance)
+          : undefined,
         maintenanceIntervalDays: input.maintenanceIntervalDays,
         totalUsageHours: input.totalUsageHours ?? 0,
         notes: input.notes,
@@ -1266,8 +1487,14 @@ export class GymDataService {
     };
   }
 
-  async updateEquipment(id: string, input: UpdateEquipmentInput, gymId?: string): Promise<Equipment | undefined> {
-    const exists = await this.prisma.equipment.findFirst({ where: { id, ...(gymId && { gymId }) } });
+  async updateEquipment(
+    id: string,
+    input: UpdateEquipmentInput,
+    gymId?: string,
+  ): Promise<Equipment | undefined> {
+    const exists = await this.prisma.equipment.findFirst({
+      where: { id, ...(gymId && { gymId }) },
+    });
     if (!exists) return undefined;
 
     await this.prisma.equipment.update({
@@ -1283,8 +1510,12 @@ export class GymDataService {
         price: input.price,
         status: this.fromEquipmentStatus(input.status),
         location: input.location,
-        lastMaintenance: input.lastMaintenance ? new Date(input.lastMaintenance) : undefined,
-        nextMaintenance: input.nextMaintenance ? new Date(input.nextMaintenance) : undefined,
+        lastMaintenance: input.lastMaintenance
+          ? new Date(input.lastMaintenance)
+          : undefined,
+        nextMaintenance: input.nextMaintenance
+          ? new Date(input.nextMaintenance)
+          : undefined,
         maintenanceIntervalDays: input.maintenanceIntervalDays,
         totalUsageHours: input.totalUsageHours,
         notes: input.notes,
@@ -1294,7 +1525,10 @@ export class GymDataService {
     return this.getEquipmentById(id);
   }
 
-  private async getEquipmentById(id: string, gymId?: string): Promise<Equipment | undefined> {
+  private async getEquipmentById(
+    id: string,
+    gymId?: string,
+  ): Promise<Equipment | undefined> {
     const item = await this.prisma.equipment.findFirst({
       where: { id, ...(gymId && { gymId }) },
       include: { maintenanceHistory: { orderBy: { createdAt: 'desc' } } },
@@ -1337,12 +1571,19 @@ export class GymDataService {
   }
 
   async deleteEquipment(id: string, gymId?: string): Promise<boolean> {
-    const result = await this.prisma.equipment.deleteMany({ where: { id, ...(gymId && { gymId }) } });
+    const result = await this.prisma.equipment.deleteMany({
+      where: { id, ...(gymId && { gymId }) },
+    });
     return result.count > 0;
   }
 
-  async scheduleMaintenance(equipmentId: string, input: CreateMaintenanceInput): Promise<MaintenanceRecord | undefined> {
-    const equipment = await this.prisma.equipment.findUnique({ where: { id: equipmentId } });
+  async scheduleMaintenance(
+    equipmentId: string,
+    input: CreateMaintenanceInput,
+  ): Promise<MaintenanceRecord | undefined> {
+    const equipment = await this.prisma.equipment.findUnique({
+      where: { id: equipmentId },
+    });
     if (!equipment) return undefined;
 
     const record = await this.prisma.maintenanceRecord.create({
@@ -1381,8 +1622,14 @@ export class GymDataService {
     };
   }
 
-  async completeMaintenance(equipmentId: string, maintenanceId: string, notes?: string): Promise<MaintenanceRecord | undefined> {
-    const record = await this.prisma.maintenanceRecord.findFirst({ where: { id: maintenanceId, equipmentId } });
+  async completeMaintenance(
+    equipmentId: string,
+    maintenanceId: string,
+    notes?: string,
+  ): Promise<MaintenanceRecord | undefined> {
+    const record = await this.prisma.maintenanceRecord.findFirst({
+      where: { id: maintenanceId, equipmentId },
+    });
     if (!record) return undefined;
 
     const completed = await this.prisma.maintenanceRecord.update({
@@ -1452,7 +1699,10 @@ export class GymDataService {
       if (severity) where.severity = severity;
     }
 
-    const alerts = await this.prisma.retentionAlert.findMany({ where, orderBy: { createdAt: 'desc' } });
+    const alerts = await this.prisma.retentionAlert.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+    });
 
     return alerts.map((alert) => ({
       id: alert.id,
@@ -1536,9 +1786,16 @@ export class GymDataService {
     active: Member[];
     atRisk: Member[];
     inactive: Member[];
-    summary: { totalClients: number; activeCount: number; atRiskCount: number; inactiveCount: number };
+    summary: {
+      totalClients: number;
+      activeCount: number;
+      atRiskCount: number;
+      inactiveCount: number;
+    };
   }> {
-    const members = await this.prisma.member.findMany({ include: { attendance: true } });
+    const members = await this.prisma.member.findMany({
+      include: { attendance: true },
+    });
     const mapped = members.map((member) => this.toMemberDTO(member));
 
     const active = mapped.filter((member) => member.status === 'active');
@@ -1558,8 +1815,14 @@ export class GymDataService {
     };
   }
 
-  async recalculateRetention(): Promise<{ message: string; updatedCount: number; timestamp: string }> {
-    const members = await this.prisma.member.findMany({ include: { attendance: true } });
+  async recalculateRetention(): Promise<{
+    message: string;
+    updatedCount: number;
+    timestamp: string;
+  }> {
+    const members = await this.prisma.member.findMany({
+      include: { attendance: true },
+    });
     let updatedCount = 0;
 
     for (const member of members) {
@@ -1570,7 +1833,11 @@ export class GymDataService {
       const status = this.fromClientStatus(nextStatus) ?? 'INACTIVE';
       const risk = this.fromChurnRiskLevel(churn.level) ?? 'BAJO';
 
-      if (member.status !== status || member.churnRiskScore !== churn.score || member.churnRiskLevel !== risk) {
+      if (
+        member.status !== status ||
+        member.churnRiskScore !== churn.score ||
+        member.churnRiskLevel !== risk
+      ) {
         await this.prisma.member.update({
           where: { id: member.id },
           data: {
@@ -1623,17 +1890,28 @@ export class GymDataService {
     occupancyRate: number;
     highRiskMembers: number;
   }> {
-    const [totalMembers, activeMembers, highRiskMembers, activeRevenue] = await Promise.all([
-      this.prisma.member.count(),
-      this.prisma.member.count({ where: { membershipStatus: 'ACTIVO' } }),
-      this.prisma.member.count({ where: { OR: [{ churnRiskLevel: 'ALTO' }, { churnRiskLevel: 'CRITICO' }] } }),
-      this.prisma.member.aggregate({ where: { membershipStatus: 'ACTIVO' }, _sum: { monthlyPrice: true } }),
-    ]);
+    const [totalMembers, activeMembers, highRiskMembers, activeRevenue] =
+      await Promise.all([
+        this.prisma.member.count(),
+        this.prisma.member.count({ where: { membershipStatus: 'ACTIVO' } }),
+        this.prisma.member.count({
+          where: { OR: [{ churnRiskLevel: 'ALTO' }, { churnRiskLevel: 'CRITICO' }] },
+        }),
+        this.prisma.member.aggregate({
+          where: { membershipStatus: 'ACTIVO' },
+          _sum: { monthlyPrice: true },
+        }),
+      ]);
 
-    const churnRate = totalMembers > 0 ? Math.round((highRiskMembers / totalMembers) * 100) : 0;
+    const churnRate =
+      totalMembers > 0 ? Math.round((highRiskMembers / totalMembers) * 100) : 0;
     const monthlyRevenue = Number(activeRevenue._sum.monthlyPrice ?? 0);
-    const averageLTV = activeMembers > 0 ? Math.round((monthlyRevenue / activeMembers) * 12) : 0;
-    const occupancyRate = totalMembers > 0 ? Math.min(100, Math.round((activeMembers / totalMembers) * 100)) : 0;
+    const averageLTV =
+      activeMembers > 0 ? Math.round((monthlyRevenue / activeMembers) * 12) : 0;
+    const occupancyRate =
+      totalMembers > 0
+        ? Math.min(100, Math.round((activeMembers / totalMembers) * 100))
+        : 0;
 
     return {
       totalMembers,
@@ -1650,7 +1928,9 @@ export class GymDataService {
     const [bajo, medio, altoCritico] = await Promise.all([
       this.prisma.member.count({ where: { churnRiskLevel: 'BAJO' } }),
       this.prisma.member.count({ where: { churnRiskLevel: 'MEDIO' } }),
-      this.prisma.member.count({ where: { OR: [{ churnRiskLevel: 'ALTO' }, { churnRiskLevel: 'CRITICO' }] } }),
+      this.prisma.member.count({
+        where: { OR: [{ churnRiskLevel: 'ALTO' }, { churnRiskLevel: 'CRITICO' }] },
+      }),
     ]);
 
     return [
@@ -1661,7 +1941,16 @@ export class GymDataService {
   }
 
   async getPipelineData(): Promise<{ stage: string; count: number; value: number }[]> {
-    const stages: string[] = ['NUEVO', 'CONTACTADO', 'TOUR_AGENDADO', 'TOUR_REALIZADO', 'PROPUESTA', 'NEGOCIACION', 'CERRADO_GANADO', 'CERRADO_PERDIDO'];
+    const stages: string[] = [
+      'NUEVO',
+      'CONTACTADO',
+      'TOUR_AGENDADO',
+      'TOUR_REALIZADO',
+      'PROPUESTA',
+      'NEGOCIACION',
+      'CERRADO_GANADO',
+      'CERRADO_PERDIDO',
+    ];
     const data: { stage: string; count: number; value: number }[] = [];
 
     for (const stage of stages) {
